@@ -2,11 +2,8 @@ package com.coach.chiselbot._global.config.loder;
 
 import com.coach.chiselbot.domain.admin.Admin;
 import com.coach.chiselbot.domain.admin.AdminRepository;
-import com.coach.chiselbot.domain.menuInfo.MenuInfo;
 import com.coach.chiselbot.domain.notice.Notice;
 import com.coach.chiselbot.domain.notice.NoticeRepository;
-import com.coach.chiselbot.domain.user.User;
-import com.coach.chiselbot.domain.user.UserJpaRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Profile;
@@ -14,9 +11,6 @@ import org.springframework.core.annotation.Order;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
-import java.sql.Timestamp;
-import java.time.Instant;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -54,7 +48,7 @@ public class NoticeLoader implements CommandLineRunner {
         }
 
         noticeRepository.saveAll(notices);
-        System.out.println("✅ 더미 공지사항 11개가 등록되었습니다.");
+        System.out.println("더미 공지사항 11개가 등록되었습니다.");
     }
 
     private String makeRandomContent(int i) {
