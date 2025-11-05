@@ -8,6 +8,7 @@ import com.coach.chiselbot.domain.userStorage.dto.StorageRequest;
 import com.coach.chiselbot.domain.userStorage.dto.StorageResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -20,6 +21,7 @@ public class UserStorageService {
     private final UserJpaRepository userRepository;
     private final InterviewQuestionRepository interviewQuestionRepository;
 
+    @Transactional
     public StorageResponse.FindById saveStorage(StorageRequest.SaveRequest request, String userEmail){
         User user = userRepository.findByEmail(userEmail)
                 .orElseThrow(() -> new RuntimeException("해당 유저를 찾을 수 없습니다"));
@@ -40,6 +42,7 @@ public class UserStorageService {
         return new StorageResponse.FindById(newStorage);
     }
 
+    @Transactional
     public void deleteStorage(Long storageId, String userEmail){
         User user = userRepository.findByEmail(userEmail)
                 .orElseThrow(() -> new RuntimeException("해당 유저를 찾을 수 없습니다"));
@@ -54,6 +57,7 @@ public class UserStorageService {
         storageRepository.delete(storage);
     }
 
+    @Transactional(readOnly = true)
     public List<StorageResponse.FindAll> getStorageList(String userEmail){
         User user = userRepository.findByEmail(userEmail)
                 .orElseThrow(() -> new RuntimeException("해당 유저를 찾을 수 없습니다"));
@@ -64,6 +68,7 @@ public class UserStorageService {
         return StorageResponse.FindAll.from(storageList);
     }
 
+    @Transactional(readOnly = true)
     public StorageResponse.FindById getStorageDetail(Long storageId, String userEmail){
         User user = userRepository.findByEmail(userEmail)
                 .orElseThrow(() -> new RuntimeException("해당 유저를 찾을 수 없습니다"));

@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../core/app_router.dart';
 import '../providers/auth_notifier.dart';
+import '../providers/storage_providers.dart';
 import 'user_avatar.dart';
 
 class MainDrawer extends ConsumerWidget {
@@ -11,6 +13,7 @@ class MainDrawer extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final (userName, userEmail) = ref.watch(currentUserInfoProvider);
     final screenWidth = MediaQuery.of(context).size.width;
+    final state = ref.watch(storageListProvider);
     return Drawer(
       backgroundColor: Colors.grey[900],
       width: screenWidth * .85,
@@ -19,62 +22,91 @@ class MainDrawer extends ConsumerWidget {
           const SizedBox(height: 40),
           Padding(
             padding: const EdgeInsets.all(16),
-            child: SizedBox(
-              child: Row(
-                children: [
-                  UserAvatar(radius: 24),
-                  SizedBox(width: 16),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    children: [
-                      Text(
-                        userName,
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                        ),
+            child: Row(
+              children: [
+                const UserAvatar(radius: 24),
+                const SizedBox(width: 16),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      userName,
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
                       ),
-                      const SizedBox(height: 8),
-                      Text(
-                        userEmail,
-                        style: TextStyle(
-                          color: Colors.white70,
-                          fontSize: 14,
-                        ),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      userEmail,
+                      style: const TextStyle(
+                        color: Colors.white70,
+                        fontSize: 14,
                       ),
-                    ],
-                  ),
-                ],
-              ),
+                    ),
+                  ],
+                ),
+              ],
             ),
           ),
           Divider(color: Colors.grey.shade800, indent: 16, endIndent: 16),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          const Padding(
+            padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             child: Align(
-                alignment: Alignment.centerLeft,
-                child: const Text(
-                  '면접 보관함',
-                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-                )),
+              alignment: Alignment.centerLeft,
+              child: Text(
+                '면접 보관함',
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+              ),
+            ),
           ),
           Expanded(
-              child: ListView(
-            padding: EdgeInsets.only(left: 8),
-            children: [
-              TextButton(
-                  onPressed: () {},
-                  style: TextButton.styleFrom(alignment: Alignment.centerLeft),
-                  child: Text(
-                    "자바에서 객체지향 설계 원칙(SOLID) 중 단일 책임 원칙(SRP)과 개방-폐쇄 원칙(OCP)의 개념을 설명해주세요.",
-                    style: const TextStyle(color: Colors.white),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  )),
-            ],
-          )),
+            child: Builder(
+              builder: (_) {
+                if (state.loading && state.items.isEmpty) {
+                  return const Center(child: CircularProgressIndicator());
+                }
+                if (state.error != null && state.items.isEmpty) {
+                  return Center(
+                    child: Text('목록 오류: ${state.error}',
+                        style: const TextStyle(color: Colors.white)),
+                  );
+                }
+                if (state.items.isEmpty) {
+                  return const Center(
+                    child: Text('보관된 항목이 없습니다.',
+                        style: TextStyle(color: Colors.white70)),
+                  );
+                }
+                return ListView.separated(
+                  padding: const EdgeInsets.symmetric(horizontal: 8),
+                  itemCount: state.items.length,
+                  separatorBuilder: (_, __) => const SizedBox(height: 2),
+                  itemBuilder: (_, i) {
+                    final it = state.items[i];
+                    return TextButton(
+                      onPressed: () {
+                        Navigator.pop(context);
+                        Navigator.of(context).pushNamed(
+                          RoutePaths.storageDetail,
+                          arguments: it.storageId,
+                        );
+                      },
+                      style:
+                          TextButton.styleFrom(alignment: Alignment.centerLeft),
+                      child: Text(
+                        "[${it.categoryName}/${it.interviewLevel}] ${it.questionText}",
+                        style: const TextStyle(color: Colors.white),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    );
+                  },
+                );
+              },
+            ),
+          ),
           Divider(color: Colors.grey.shade800, indent: 16, endIndent: 16),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
@@ -83,11 +115,9 @@ class MainDrawer extends ConsumerWidget {
               child: InkWell(
                 onTap: () {
                   Navigator.pop(context);
-                  Navigator.of(context).pushNamed(
-                    '/settings',
-                  );
+                  Navigator.of(context).pushNamed('/settings');
                 },
-                child: const Icon(Icons.settings),
+                child: const Icon(Icons.settings, color: Colors.white),
               ),
             ),
           ),

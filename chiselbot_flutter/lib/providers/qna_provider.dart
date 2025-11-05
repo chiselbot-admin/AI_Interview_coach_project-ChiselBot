@@ -4,6 +4,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/api_models.dart'; // InterviewCategory/Question/CoachFeedback
 import '../models/inquiry.dart'; // Inquiry 모델
 import '../services/api_service.dart';
+import '../services/auth_api_service.dart';
+import 'auth_notifier.dart';
 
 /// 면접 코칭용
 class QnaProvider extends ChangeNotifier {
@@ -124,9 +126,16 @@ class QnaProvider extends ChangeNotifier {
 
 /// QnA(1:1 문의)용
 
-// ApiService를 Riverpod에서도 쓰기 위한 Provider (baseUrl은 실제 환경에 맞게)
-const String _kBaseUrl = 'http://10.0.2.2:8080';
-final apiServiceProvider = Provider<ApiService>((ref) => ApiService(_kBaseUrl));
+// authApiServiceProvider에서 같은 ApiService 인스턴스 재사용
+final apiServiceProvider = Provider<ApiService>((ref) {
+  final authApi = ref.watch(authApiServiceProvider);
+  return authApi.api; // <-- AuthApiService에 추가한 getter (ApiService get api)
+});
+
+final qnaChangeNotifierProvider = ChangeNotifierProvider<QnaProvider>((ref) {
+  final api = ref.watch(apiServiceProvider);
+  return QnaProvider(api);
+});
 
 // 현재 로그인한 관리자 ID (없으면 null, 있을때 1)
 final currentAdminIdProvider = StateProvider<int?>((ref) => 1);

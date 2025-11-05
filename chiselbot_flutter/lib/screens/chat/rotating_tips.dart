@@ -1,38 +1,47 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
-
-//로딩 중 애니메이션
 
 class RotatingTips extends StatefulWidget {
   final List<String> messages;
-  const RotatingTips({super.key, required this.messages});
+  final int intervalMs; // 기본 전환 간격
+
+  const RotatingTips({
+    super.key,
+    required this.messages,
+    this.intervalMs = 1200, // 기존 기본값 유지
+  });
 
   @override
   State<RotatingTips> createState() => _RotatingTipsState();
 }
 
 class _RotatingTipsState extends State<RotatingTips> {
-  int index = 0;
+  int _index = 0;
+  Timer? _t;
 
   @override
   void initState() {
     super.initState();
-    Future.doWhile(() async {
-      await Future.delayed(const Duration(seconds: 1));
-      if (!mounted) return false;
-      setState(() => index = (index + 1) % widget.messages.length);
-      return true;
+    _t = Timer.periodic(Duration(milliseconds: widget.intervalMs), (_) {
+      if (!mounted) return;
+      setState(() => _index = (_index + 1) % widget.messages.length);
     });
   }
 
   @override
-  Widget build(BuildContext context) => Row(
-        children: [
-          const SizedBox(
-              height: 16,
-              width: 16,
-              child: CircularProgressIndicator(strokeWidth: 2)),
-          const SizedBox(width: 8),
-          Text(widget.messages[index]),
-        ],
-      );
+  void dispose() {
+    _t?.cancel();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedSwitcher(
+      duration: const Duration(milliseconds: 250),
+      child: Text(
+        widget.messages[_index],
+        key: ValueKey(_index),
+      ),
+    );
+  }
 }

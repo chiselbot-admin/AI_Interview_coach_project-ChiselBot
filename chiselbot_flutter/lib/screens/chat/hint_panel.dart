@@ -67,7 +67,7 @@ class HintPanel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // 1) 시도 후: 모범답안 > 서버 힌트 > 시도 전: question.answerText(LEVEL_1) > question.questionText
+    // 모범답안 > 서버 힌트 > 시도 전: question.answerText(LEVEL_1) > question.questionText
     final source = () {
       if (fb?.questionAnswer != null && fb!.questionAnswer!.isNotEmpty) {
         return fb!.questionAnswer!;

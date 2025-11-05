@@ -21,6 +21,10 @@ class ApiService {
     return h;
   }
 
+  // extension에서 쓸 수 있도록 공개 메서드
+  Map<String, String> getHeaders({bool jsonBody = true}) =>
+      _headers(jsonBody: jsonBody);
+
   Future<List<InterviewCategory>> fetchCategories() async {
     final res = await http.get(
       Uri.parse('$baseUrl/api/interview/categories'),

@@ -10,6 +10,9 @@ class AuthApiService {
 
   AuthApiService(this._apiService, this._authClient);
 
+  // 외부에서 동일 ApiService를 꺼내 쓰기 위한 게터
+  ApiService get api => _apiService;
+
   Future<AuthResultModel> login({required LoginRequestModel request}) async {
     // 1. URL 경로 확정 (type=Local 사용)
     const String path = '/api/users/login/Local';

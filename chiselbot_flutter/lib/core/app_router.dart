@@ -13,6 +13,8 @@ import '../screens/qna/qna_form_screen.dart';
 import '../screens/qna/qna_list_screen.dart';
 import '../screens/setting_screen.dart';
 import '../screens/splash_screen.dart';
+import '../screens/storage_detail_screen.dart';
+import '../screens/storage_list_screen.dart';
 
 class RoutePaths {
   static const root = '/';
@@ -28,6 +30,8 @@ class RoutePaths {
   static const findIdPw = '/findIdPw';
   static const emailLogin = '/emailLogin'; // EmailLoginScreen
   static const onboarding = '/onboarding'; // OnboardingScreen
+  static const storageList = '/storage';
+  static const storageDetail = '/storage/detail';
 }
 
 class QnaDetailArgs {
@@ -66,6 +70,12 @@ class AppRouter {
         } else {
           return _error('Invalid arguments for /notice/detail');
         }
+      case RoutePaths.storageList:
+        return MaterialPageRoute(builder: (_) => const StorageListScreen());
+      case RoutePaths.storageDetail:
+        final id = settings.arguments as int;
+        return MaterialPageRoute(
+            builder: (_) => StorageDetailScreen(storageId: id));
       case RoutePaths.chat:
         return MaterialPageRoute(builder: (_) => const ChatScreen());
       case RoutePaths.qna:
