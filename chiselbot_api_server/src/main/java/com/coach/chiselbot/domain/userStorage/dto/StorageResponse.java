@@ -24,12 +24,14 @@ public class StorageResponse {
         private final String interviewLevel;
         private final String categoryName;
         private final String createdAt;
+        private final String questionAnswer;
 
         public FindById(UserStorage storage) {
             this.storageId = storage.getStorageId();
             this.questionId = storage.getQuestion().getQuestionId();
             this.userId = storage.getUser().getId();
             this.questionText = storage.getQuestion().getQuestionText();
+            this.questionAnswer = storage.getQuestion().getAnswerText();
             this.userAnswer = nvl(storage.getUserAnswer());
             this.feedback = nvl(storage.getFeedback());
             this.hint = nvl(storage.getHint());

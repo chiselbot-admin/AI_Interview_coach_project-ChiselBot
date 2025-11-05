@@ -41,6 +41,7 @@ public class UserStorageRestController {
      *     "questionId": 5,
      *     "questionText": "TCP는 무엇인가요?",
      *     "userAnswer": "TCP는 연결 기반의 프로토콜입니다.",
+     *     "questionAnswer": "질문에 대한 답 (DB기반)",
      *     "feedback": "핵심 개념은 맞지만, 신뢰성 언급이 빠졌습니다.",
      *     "hint": "TCP는 순서 보장과 재전송 기능을 제공합니다.",
      *     "similarity": 0.82,

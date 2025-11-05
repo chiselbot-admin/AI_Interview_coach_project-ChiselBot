@@ -37,19 +37,13 @@ public class InterviewCoachService {
         // 1. 유사도 계산
         FeedbackStrategy feedbackStrategy =
                 feedbackStrategyFactory.getStrategy(question.getInterviewLevel());
-        /**
-         * 질문등록 기능 완료 시 유사도 계산식 복구
-         * */
+
         FeedbackResponse.SimilarityResult similarity = feedbackStrategy.calculateSimilarity(feedbackRequest.getUserAnswer(), question);
 
         similarity = new FeedbackResponse.SimilarityResult(
                 Double.parseDouble(String.format("%.2f", similarity.getIntentSimilarity())),
                 similarity.getPointSimilarity());
 
-        /**
-         * 임시 값 대입
-         * */
-        //FeedbackResponse.SimilarityResult similarityResult = new FeedbackResponse.SimilarityResult(0.15, 0.0);
 
         // 2. 프롬프트 생성
         String prompt = promptFactory.createPrompt(question, feedbackRequest.getUserAnswer(), similarity);
@@ -65,12 +59,7 @@ public class InterviewCoachService {
         System.out.println("================================");
 
         // 3. AI 모델 호출 - 응답 받기
-        long startTime = System.currentTimeMillis();
         String aiAnswer = chatModel.call(prompt);
-        long endTime = System.currentTimeMillis();
-
-        // System.out.println("ai답변:" + aiAnswer);
-        System.out.println("ChatGPT 응답 소요 시간: " + (endTime - startTime) + "ms"); // 네트워크 + AI응답속도
 
         // 4. JSON 문자열 형태 응답 -> DTO 변환
         FeedbackResponse.FeedbackResult result = null;
