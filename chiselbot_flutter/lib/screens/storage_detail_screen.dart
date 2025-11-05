@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../providers/storage_providers.dart';
 
@@ -15,7 +14,6 @@ class StorageDetailScreen extends ConsumerWidget {
       appBar: AppBar(
         title: const Text('보관함 상세'),
         actions: [
-          // 여기서 바로 삭제 가능하게 노출
           IconButton(
             icon: const Icon(Icons.delete_outline),
             tooltip: '삭제',
@@ -27,11 +25,13 @@ class StorageDetailScreen extends ConsumerWidget {
                   content: const Text('이 보관 항목을 삭제할까요?'),
                   actions: [
                     TextButton(
-                        onPressed: () => Navigator.pop(context, false),
-                        child: const Text('취소')),
+                      onPressed: () => Navigator.pop(context, false),
+                      child: const Text('취소'),
+                    ),
                     FilledButton(
-                        onPressed: () => Navigator.pop(context, true),
-                        child: const Text('삭제')),
+                      onPressed: () => Navigator.pop(context, true),
+                      child: const Text('삭제'),
+                    ),
                   ],
                 ),
               );
@@ -60,7 +60,7 @@ class StorageDetailScreen extends ConsumerWidget {
           padding: const EdgeInsets.all(16),
           child: ListView(
             children: [
-              // 가독성 높은 카드 UI
+              // 헤더 카드
               Card(
                 elevation: 0,
                 color: Colors.white.withOpacity(0.04),
@@ -86,15 +86,18 @@ class StorageDetailScreen extends ConsumerWidget {
               ),
               const SizedBox(height: 16),
 
-              _section(context, '내 답변', d.userAnswer),
+              _section(context, title: '내 답변', body: d.userAnswer),
               const SizedBox(height: 12),
-              _section(
-                  context, '피드백', d.feedback.isNotEmpty ? d.feedback : '—'),
+              _section(context,
+                  title: '피드백', body: d.feedback.isNotEmpty ? d.feedback : '—'),
               const SizedBox(height: 12),
-              _section(context, '힌트', d.hint.isNotEmpty ? d.hint : '—'),
+              _section(context,
+                  title: '힌트', body: d.hint.isNotEmpty ? d.hint : '—'),
               const SizedBox(height: 12),
-              if (d.similarity != null)
-                _section(context, '유사도', d.similarity!.toStringAsFixed(3)),
+              if (d.similarity != null) ...[
+                const SizedBox(height: 12),
+                _SimilarityGauge(value: d.similarity!),
+              ],
             ],
           ),
         ),
@@ -102,7 +105,8 @@ class StorageDetailScreen extends ConsumerWidget {
     );
   }
 
-  Widget _section(BuildContext context, String title, String body) {
+  Widget _section(BuildContext context,
+      {required String title, required String body}) {
     return Card(
       elevation: 0,
       color: Colors.white.withOpacity(0.03),
@@ -115,25 +119,7 @@ class StorageDetailScreen extends ConsumerWidget {
                 style:
                     const TextStyle(fontWeight: FontWeight.w600, fontSize: 14)),
             const SizedBox(height: 8),
-            SelectableText(
-              body,
-              style: const TextStyle(height: 1.35),
-            ),
-            const SizedBox(height: 4),
-            Row(
-              children: [
-                TextButton.icon(
-                  onPressed: () {
-                    Clipboard.setData(ClipboardData(text: body));
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('복사되었습니다.')),
-                    );
-                  },
-                  icon: const Icon(Icons.copy, size: 16),
-                  label: const Text('복사'),
-                ),
-              ],
-            )
+            SelectableText(body, style: const TextStyle(height: 1.35)),
           ],
         ),
       ),
@@ -147,5 +133,41 @@ class StorageDetailScreen extends ConsumerWidget {
     final hh = dt.hour.toString().padLeft(2, '0');
     final mm = dt.minute.toString().padLeft(2, '0');
     return '$y-$m-$d $hh:$mm';
+  }
+}
+
+// 유사도 시각화
+class _SimilarityGauge extends StatelessWidget {
+  final double value; // 0.0 ~ 1.0
+  const _SimilarityGauge({required this.value});
+
+  @override
+  Widget build(BuildContext context) {
+    final v = value.clamp(0.0, 1.0);
+    final percent = (v * 100).round();
+
+    return Card(
+      elevation: 0,
+      color: Colors.white.withOpacity(0.04),
+      child: Padding(
+        padding: const EdgeInsets.all(14),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text('유사도', style: TextStyle(fontWeight: FontWeight.w600)),
+            const SizedBox(height: 8),
+            ClipRRect(
+              borderRadius: BorderRadius.circular(6),
+              child: LinearProgressIndicator(
+                value: v,
+                minHeight: 10,
+              ),
+            ),
+            const SizedBox(height: 6),
+            Text('$percent%', style: Theme.of(context).textTheme.bodySmall),
+          ],
+        ),
+      ),
+    );
   }
 }

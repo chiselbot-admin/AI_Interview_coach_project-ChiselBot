@@ -85,11 +85,36 @@ class _StorageListScreenState extends ConsumerState<StorageListScreen> {
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
-                    subtitle: Text(
-                      // 날짜 + (레벨/카테고리)
-                      '${_friendlyDateTime(it.createdAt)} · ${it.interviewLevel} · ${it.categoryName}',
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
+                    subtitle: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          '${_friendlyDateTime(it.createdAt)} · ${it.interviewLevel} · ${it.categoryName}',
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        if (it.similarity != null) ...[
+                          const SizedBox(height: 6),
+                          Row(
+                            children: [
+                              Text(
+                                '${(it.similarity!.clamp(0, 1) * 100).round()}%',
+                                style: Theme.of(context).textTheme.bodySmall,
+                              ),
+                              const SizedBox(width: 8),
+                              Expanded(
+                                child: ClipRRect(
+                                  borderRadius: BorderRadius.circular(4),
+                                  child: LinearProgressIndicator(
+                                    value: it.similarity!.clamp(0, 1),
+                                    minHeight: 6,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ],
                     ),
                     trailing: IconButton(
                       icon: const Icon(Icons.delete_outline),

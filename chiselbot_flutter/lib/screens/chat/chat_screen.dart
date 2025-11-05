@@ -1,4 +1,3 @@
-// lib/features/chat/chat_screen.dart
 import '../chat/quick_self_check.dart';
 import '../chat/rotating_tips.dart';
 import 'package:flutter/material.dart';
@@ -22,7 +21,8 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
   final _ctrl = TextEditingController();
   late QnaProvider qna;
 
-  bool _submitted = false; // 코칭 1회 제한 플래그
+  bool _submitted = false; // 코칭 1회 제한
+  bool _showModel = false; // ⬅️ 모범답안 노출 토글 상태
 
   @override
   void didChangeDependencies() {
@@ -52,7 +52,6 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
         title: const Text('AI 면접 코치'),
         actions: [
           IconButton(
-            // 아이콘 커짐
             iconSize: 28,
             icon: const Icon(Icons.bookmark_add_rounded),
             tooltip: '보관하기',
@@ -63,7 +62,6 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                     final q = qna.currentQuestion!;
                     final fb = qna.lastFeedback!;
                     try {
-                      // 실제 필드 매핑 (null 안전 처리)
                       await api.saveStorage(
                         questionId: q.questionId,
                         userAnswer: fb.userAnswer,
@@ -76,7 +74,6 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                       ScaffoldMessenger.of(context).showSnackBar(
                         const SnackBar(content: Text('보관함에 저장되었습니다.')),
                       );
-                      // 드로어/목록 최신화
                       ref.invalidate(storageListProvider);
                       await ref.read(storageListProvider.notifier).refresh();
                     } catch (e) {
@@ -122,9 +119,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                       TextField(
                         controller: _ctrl,
                         maxLines: 5,
-                        enabled: qna.typingDone &&
-                            !_submitted &&
-                            !qna.loading, // CHANGED
+                        enabled: qna.typingDone && !_submitted && !qna.loading,
                         decoration: const InputDecoration(
                           hintText: '답변을 입력하세요',
                           border: OutlineInputBorder(),
@@ -142,7 +137,16 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                                       _submitted)
                                   ? null
                                   : () async {
-                                      await qna.submitAnswer(_ctrl.text.trim());
+                                      final text = _ctrl.text.trim();
+                                      if (text.isEmpty) {
+                                        ScaffoldMessenger.of(context)
+                                            .showSnackBar(
+                                          const SnackBar(
+                                              content: Text('답변을 작성해주세요!')),
+                                        );
+                                        return;
+                                      }
+                                      await qna.submitAnswer(text);
                                       if (qna.error != null && mounted) {
                                         ScaffoldMessenger.of(context)
                                             .showSnackBar(
@@ -152,7 +156,8 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                                         );
                                       } else {
                                         setState(() {
-                                          _submitted = true; // CHANGED: 1회 제한
+                                          _submitted = true;
+                                          _showModel = false; // ⬅️ 제출 직후 기본 숨김
                                         });
                                       }
                                     },
@@ -183,7 +188,8 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                                       );
                                       _ctrl.clear();
                                       setState(() {
-                                        _submitted = false; //다음 문제 시 재시도 가능
+                                        _submitted = false;
+                                        _showModel = false; // ⬅️ 다음 문제 시 숨김
                                       });
 
                                       if (qna.error != null && mounted) {
@@ -208,7 +214,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                       ),
                       const SizedBox(height: 12),
 
-                      // 로딩 (문구 느리게 - RotatingTips에 intervalMs 추가)
+                      // 로딩 (느리게)
                       if (qna.loading) ...[
                         const _ShimmerCard(),
                         const SizedBox(height: 8),
@@ -225,11 +231,35 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
 
                       // 결과
                       if (qna.lastFeedback != null && !qna.loading) ...[
+                        // 요약(판정 결과 메시지 버블이 아닌, 요약 카드 유지)
                         ResultSummary(fb: qna.lastFeedback!),
                         const SizedBox(height: 8),
 
-                        // CHANGED: Diff 제거, 모범답안 “원문만” 노출
-                        if (qna.lastFeedback?.questionAnswer != null)
+                        // ⬇️ 모범답안 보기/숨기기 토글 버튼 (답안이 있을 때만 활성)
+                        Align(
+                          alignment: Alignment.centerRight,
+                          child: TextButton.icon(
+                            onPressed:
+                                (qna.lastFeedback?.questionAnswer != null)
+                                    ? () => setState(() {
+                                          _showModel = !_showModel;
+                                        })
+                                    : null,
+                            icon: Icon(
+                              _showModel
+                                  ? Icons.visibility_off
+                                  : Icons.visibility,
+                            ),
+                            label: Text(
+                              _showModel ? '모범답안 숨기기' : '모범답안 보기',
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+
+                        // ⬇️ 모범답안은 토글 상태일 때만 노출
+                        if (_showModel &&
+                            qna.lastFeedback?.questionAnswer != null)
                           _ModelAnswerBlock(
                             modelText: qna.lastFeedback!.questionAnswer!,
                           ),
