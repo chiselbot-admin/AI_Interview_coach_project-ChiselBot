@@ -1,19 +1,10 @@
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 
 import '../models/cards.dart';
-import '../widgets/card_view.dart';
-import '../widgets/qna_quick_card.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter_spinkit/flutter_spinkit.dart';
 import '../providers/app_providers.dart';
-
-import '../models/api_models.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter_spinkit/flutter_spinkit.dart';
-
-import '../core/constants.dart';
-import '../models/cards.dart';
-import 'card_view.dart';
+import '../widgets/card_view.dart';
 import 'main_view_title.dart';
 import 'notice_view.dart';
 

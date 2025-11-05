@@ -9,6 +9,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Map;
+
 @RequestMapping("/api/users")
 @RestController
 @RequiredArgsConstructor
@@ -74,4 +76,17 @@ public class UserRestController {
     public ResponseEntity<CommonResponseDto<?>> findOne(@PathVariable String userEmail) {
         return ResponseEntity.ok(CommonResponseDto.success(userService.findOne(userEmail), "조회되었습니다."));
     }
+
+	/**
+	 * 내 정보 조회 API (JWT 기반)
+	 * GET /api/users/me
+	 */
+	@GetMapping("/me")
+	public ResponseEntity<CommonResponseDto<?>> getMyProfile(
+			@RequestAttribute("userEmail") String userEmail
+	) {
+		Map<String, Object> user = userService.findOne(userEmail);
+		return ResponseEntity.ok(CommonResponseDto.success(user, "조회되었습니다."));
+	}
+
 }

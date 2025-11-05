@@ -8,6 +8,7 @@ import '../screens/login_screen.dart';
 import '../screens/main_screen.dart';
 import '../screens/notice/notice_detail_screen.dart';
 import '../screens/onboarding_screen.dart';
+import '../screens/profile_edit_screen.dart';
 import '../screens/qna/qna_detail_screen.dart';
 import '../screens/qna/qna_form_screen.dart';
 import '../screens/qna/qna_list_screen.dart';
@@ -26,8 +27,9 @@ class RoutePaths {
   static const qnaNew = '/qna/new';
   static const qnaDetail = '/qna/detail';
   static const findIdPw = '/findIdPw';
-  static const emailLogin = '/emailLogin'; // EmailLoginScreen
-  static const onboarding = '/onboarding'; // OnboardingScreen
+  static const emailLogin = '/emailLogin';
+  static const onboarding = '/onboarding';
+  static const profileEdit = '/profile-edit';
 }
 
 class QnaDetailArgs {
@@ -83,6 +85,8 @@ class AppRouter {
         } else {
           return _error('Invalid arguments for /qna/detail');
         }
+      case RoutePaths.profileEdit:
+        return MaterialPageRoute(builder: (_) => const ProfileEditScreen());
 
       default:
         return _unknown(settings.name);

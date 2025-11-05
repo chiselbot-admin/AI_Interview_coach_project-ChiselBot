@@ -1,5 +1,6 @@
 import '../models/auth/auth_result_model.dart';
 import '../models/auth/find_auth_data.dart';
+import '../models/auth/user_update_request_model.dart';
 import '../models/user_model.dart';
 
 abstract class IAuthRepository {
@@ -25,5 +26,14 @@ abstract class IAuthRepository {
   Future<void> resetPassword({
     required String resetToken,
     required String newPassword,
+  });
+
+  /// 내 정보 조회 (JWT 기반)
+  Future<UserModel> getMyProfile({required String token});
+
+  /// 회원정보 수정
+  Future<void> updateProfile({
+    required String token,
+    required UserUpdateRequestModel request,
   });
 }

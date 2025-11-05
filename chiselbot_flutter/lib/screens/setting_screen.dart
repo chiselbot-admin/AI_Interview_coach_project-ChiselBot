@@ -22,7 +22,7 @@ class SettingsScreen extends ConsumerWidget {
             title: const Text('프로필 수정'),
             trailing: const Icon(Icons.arrow_forward_ios, size: 16),
             onTap: () {
-              // TODO: 프로필 수정 화면으로 이동
+              Navigator.of(context).pushNamed('/profile-edit');
             },
           ),
           Divider(color: Colors.grey.shade800, indent: 16, endIndent: 16),

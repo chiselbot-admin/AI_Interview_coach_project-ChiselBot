@@ -3,27 +3,17 @@ import 'package:flutter/foundation.dart';
 
 import '../models/auth/find_auth_data.dart';
 import '../repositories/i_auth_repository.dart';
-import '../repositories/dummy_auth_repository.dart';
+import 'auth_notifier.dart';
 
-// 1. IAuthRepository를 제공하는 Provider (의존성 주입)
-final authRepositoryProvider = Provider<IAuthRepository>((ref) {
-  // 현재는 Dummy 구현체를 사용하며, 실제 서버 통신 시 ServerAuthRepository로 교체됨
-  return DummyAuthRepository();
-});
-
-// =======================================================
-// 2. FindAuthState 상태를 관리하는 Notifier Provider
-// =======================================================
+// FindAuthState 상태를 관리하는 Notifier Provider
 final findAuthNotifierProvider =
     StateNotifierProvider<FindAuthNotifier, FindAuthState>((ref) {
-  // Notifier 생성 시 IAuthRepository를 주입받습니다.
   final repository = ref.watch(authRepositoryProvider);
 
   return FindAuthNotifier(repository);
 });
 
 class FindAuthNotifier extends StateNotifier<FindAuthState> {
-  // Repository를 추상화된 IAuthRepository 타입으로 받습니다. (OCP/DIP 준수)
   final IAuthRepository _authRepository;
 
   FindAuthNotifier(this._authRepository) : super(const FindAuthState());

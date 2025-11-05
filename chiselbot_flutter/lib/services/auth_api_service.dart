@@ -1,6 +1,8 @@
 import 'package:dio/dio.dart';
 import '../models/auth/auth_result_model.dart';
+import '../models/auth/user_update_request_model.dart';
 import '../models/login/login_request_model.dart';
+import '../models/user_model.dart';
 import 'api_service.dart';
 import 'auth_client.dart';
 
@@ -11,7 +13,7 @@ class AuthApiService {
   AuthApiService(this._apiService, this._authClient);
 
   Future<AuthResultModel> login({required LoginRequestModel request}) async {
-    // 1. URL 경로 확정 (type=Local 사용)
+    // URL 경로 확정 (type=Local 사용)
     const String path = '/api/users/login/Local';
 
     try {
@@ -105,6 +107,56 @@ class AuthApiService {
     } on DioException catch (e) {
       final responseData = e.response?.data;
       final String errorMessage = responseData?['message'] ?? '회원가입에 실패했습니다.';
+      throw Exception(errorMessage);
+    }
+  }
+
+  /// 내 정보 조회 (JWT 기반)
+  /// GET /api/users/me
+  Future<UserModel> getMyProfile({required String token}) async {
+    const String path = '/api/users/me';
+
+    try {
+      final Response<Map<String, dynamic>> response = await _authClient.dio.get(
+        path,
+        options: Options(
+          headers: {'Authorization': 'Bearer $token'},
+        ),
+      );
+
+      final Map<String, dynamic> responseData = response.data!;
+      final Map<String, dynamic> dataMap =
+          responseData['data'] as Map<String, dynamic>;
+
+      return UserModel.fromJson(dataMap);
+    } on DioException catch (e) {
+      final responseData = e.response?.data;
+      final String errorMessage =
+          responseData?['message'] ?? '회원정보 조회에 실패했습니다.';
+      throw Exception(errorMessage);
+    }
+  }
+
+  /// 회원정보 수정
+  /// PATCH /api/users/update
+  Future<void> updateProfile({
+    required String token,
+    required UserUpdateRequestModel request,
+  }) async {
+    const String path = '/api/users/update';
+
+    try {
+      await _authClient.dio.patch(
+        path,
+        data: request.toJson(),
+        options: Options(
+          headers: {'Authorization': 'Bearer $token'},
+        ),
+      );
+    } on DioException catch (e) {
+      final responseData = e.response?.data;
+      final String errorMessage =
+          responseData?['message'] ?? '회원정보 수정에 실패했습니다.';
       throw Exception(errorMessage);
     }
   }

@@ -69,8 +69,8 @@ public class UserService {
     /**
      * 회원 정보 수정 처리
      */
-    public User update(String id, UserRequestDTO.Update dto) {
-        User user = userJpaRepository.findByEmail(dto.getEmail())
+    public User update(String userEmail, UserRequestDTO.Update dto) {
+        User user = userJpaRepository.findByEmail(userEmail)
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 회원입니다."));
 
         user.setName(dto.getName());

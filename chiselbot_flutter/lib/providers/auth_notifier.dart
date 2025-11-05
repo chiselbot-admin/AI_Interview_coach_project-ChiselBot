@@ -178,6 +178,32 @@ class AuthNotifier extends StateNotifier<AuthState> {
     debugPrint('[AUTH] 로그아웃');
   }
 
+  /// 사용자 이름 업데이트 (프로필 수정 후)
+  void updateUserName(String name) {
+    state = state.when(
+      (isLoading, isLoggedIn, user, token, errorMessage) {
+        if (user != null) {
+          return AuthState(
+            isLoading: isLoading,
+            isLoggedIn: isLoggedIn,
+            user: user.copyWith(name: name),
+            token: token,
+            errorMessage: errorMessage,
+          );
+        }
+        return AuthState(
+          isLoading: isLoading,
+          isLoggedIn: isLoggedIn,
+          user: user,
+          token: token,
+          errorMessage: errorMessage,
+        );
+      },
+      unauthenticated: () => const AuthState.unauthenticated(),
+    );
+    debugPrint('[AUTH] 사용자 이름 업데이트: $name');
+  }
+
   /// 자동 로그인 체크 (추후 구현)
   Future<void> checkAuthStatus() async {
     // TODO: 저장된 토큰 확인 및 자동 로그인 처리

@@ -1,4 +1,5 @@
 import '../models/auth/find_auth_data.dart';
+import '../models/auth/user_update_request_model.dart';
 import '../models/login/login_request_model.dart';
 import '../models/user_model.dart';
 import '../services/auth_api_service.dart';
@@ -64,5 +65,18 @@ class AuthRepository implements IAuthRepository {
   }) {
     // 비밀번호 재설정 API 구현 예정
     throw UnimplementedError('비밀번호 재설정 기능은 구현되지 않았습니다.');
+  }
+
+  @override
+  Future<UserModel> getMyProfile({required String token}) async {
+    return await authApiService.getMyProfile(token: token);
+  }
+
+  @override
+  Future<void> updateProfile({
+    required String token,
+    required UserUpdateRequestModel request,
+  }) async {
+    await authApiService.updateProfile(token: token, request: request);
   }
 }
