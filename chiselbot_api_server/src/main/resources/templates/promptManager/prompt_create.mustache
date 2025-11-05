@@ -1,0 +1,70 @@
+{{> layout/header }}
+<body id="page-top">
+<div id="wrapper">
+    {{> layout/sidebar }}
+    <div id="content-wrapper" class="d-flex flex-column">
+        <div id="content">
+            {{> layout/topbar }}
+
+            <div class="container mt-5">
+                <h2 class="mb-4 text-center fw-bold">새 프롬프트 등록</h2>
+
+                <div class="card shadow-sm p-4">
+                    <form method="post">
+                        <!-- 레벨 선택 -->
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">레벨</label>
+                            <select class="form-select" name="level" required>
+                                <option value="" disabled selected>레벨 선택</option>
+                                {{#levels}}
+                                    <option value="{{.}}">{{.}}</option>
+                                {{/levels}}
+                            </select>
+                        </div>
+
+                        <!-- 활성화 여부 -->
+                        <div class="form-check mb-3">
+                            <input type="checkbox" class="form-check-input" id="isActive" name="isActive" value="true">
+                            <label class="form-check-label" for="isActive">활성화</label>
+                        </div>
+
+                        <!-- 프롬프트 본문 -->
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">프롬프트 본문</label>
+                            <textarea class="form-control" name="promptBody" rows="10" required></textarea>
+                        </div>
+
+                        <div class="d-flex justify-content-between">
+                            <a href="/admin/prompts" class="btn btn-secondary">취소</a>
+                            <button type="submit" class="btn btn-primary">등록</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        {{> layout/footer }}
+    </div>
+</div>
+
+<style>
+    .card {
+        border-radius: 8px;
+        max-width: 800px;
+        margin: 0 auto;
+    }
+    textarea {
+        font-family: monospace;
+        font-size: 0.9rem;
+    }
+</style>
+
+{{#message}}
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            alert("{{{message}}}");
+    });
+    </script>
+{{/message}}
+
+</body>
+</html>

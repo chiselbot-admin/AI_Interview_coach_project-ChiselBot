@@ -10,7 +10,7 @@
                 <h2 class="mb-4 text-center fw-bold">프롬프트 상세</h2>
 
                 <div class="card shadow-sm p-4">
-                    <form method="post">
+                    <form action="/admin/prompts/detail/{{prompt.id}}" method="post">
                         <div class="mb-3">
                             <label class="form-label fw-bold">레벨</label>
                             <input type="text" class="form-control" value="{{prompt.level}}" readonly>
