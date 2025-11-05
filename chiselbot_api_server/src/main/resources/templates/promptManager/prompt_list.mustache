@@ -28,23 +28,23 @@
                                 <td>
                                     <input type="checkbox"
                                            class="form-check-input"
-                                           onchange="toggleActive({{id}}, this.checked)"
+                                           onchange="toggleActive({{id}}, this)"
                                            {{#isActive}}checked{{/isActive}}>
                                 </td>
                                 <td class="text-ellipsis">{{promptBody}}</td>
                                 <td>
-                                    {{#isActive}}
-                                        <a href="/admin/prompts/detail/{{id}}" class="btn btn-sm btn-outline-primary">상세보기</a>
-                                    {{/isActive}}
-                                    {{^isActive}}
-                                        <span class="text-muted small">비활성</span>
-                                    {{/isActive}}
+                                    <a href="/admin/prompts/detail/{{id}}"
+                                       class="btn btn-sm btn-outline-primary">
+                                        상세보기
+                                    </a>
                                 </td>
                             </tr>
                         {{/prompts}}
                         {{^prompts}}
                             <tr>
-                                <td colspan="5" class="text-center text-muted">등록된 프롬프트가 없습니다.</td>
+                                <td colspan="5" class="text-center text-muted">
+                                    등록된 프롬프트가 없습니다.
+                                </td>
                             </tr>
                         {{/prompts}}
                         </tbody>
@@ -79,13 +79,39 @@
 </style>
 
 <script>
-    function toggleActive(id, active) {
-      fetch(`/admin/prompts/toggle/${id}?active=${active}`, { method: 'POST' })
-        .then(res => {
-            if (res.ok) location.reload();
-            else alert("변경 실패");
-        });
+    function toggleActive(id, checkboxEl) {
+        const active = checkboxEl.checked;
+
+        if (active) {
+            const confirmActivate = confirm("이 프롬프트를 활성화하시겠습니까?\n(같은 레벨의 다른 프롬프트는 자동으로 비활성화됩니다)");
+            if (!confirmActivate) {
+                checkboxEl.checked = false; // 취소 시 원래 상태로 복원
+                return;
+            }
+        }
+
+        fetch(`/admin/prompts/toggle/${id}?active=${active}`, { method: 'POST' })
+            .then(res => {
+                if (res.ok) {
+                    alert(active ? "프롬프트가 활성화되었습니다." : "프롬프트가 비활성화되었습니다.");
+                    location.reload();
+                } else {
+                    alert("변경 실패");
+                }
+            })
+            .catch(() => {
+                alert("요청 중 오류가 발생했습니다.");
+                checkboxEl.checked = !active; // 실패 시 원래 상태 복원
+            });
     }
 </script>
+
+{{#message}}
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            alert("{{{message}}}");
+    });
+    </script>
+{{/message}}
 </body>
 </html>

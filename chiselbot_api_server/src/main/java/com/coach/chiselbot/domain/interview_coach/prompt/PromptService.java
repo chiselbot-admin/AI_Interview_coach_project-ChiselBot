@@ -1,8 +1,10 @@
 package com.coach.chiselbot.domain.interview_coach.prompt;
 
 import com.coach.chiselbot._global.errors.adminException.AdminException500;
+import com.coach.chiselbot.domain.interview_coach.prompt.dto.PromptRequest;
 import com.coach.chiselbot.domain.interview_coach.prompt.dto.PromptResponse;
 import com.coach.chiselbot.domain.interview_question.InterviewLevel;
+import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -14,31 +16,35 @@ import java.util.List;
 @RequiredArgsConstructor
 public class PromptService {
     private final PromptRepository promptRepository;
+    private final EntityManager em;
 
     /**
      * 새 프롬프트 등록
      * */
     @Transactional
-    public PromptResponse.FindById registerPrompt(InterviewLevel level,
-                                                  String promptBody,
-                                                  boolean activate) {
+    public PromptResponse.FindById registerPrompt(PromptRequest.CreatePrompt request) {
         // 현재 레벨의 프롬프트 개수 조회(버전 따로 관리)
-        long count = promptRepository.countByLevel(level);
+        long count = promptRepository.countByLevel(request.getLevel());
 
         // 새로운 프롬프트 생성
         Prompt prompt = new Prompt();
-        prompt.setLevel(level);
-        prompt.setPromptBody(promptBody);
+        prompt.setLevel(request.getLevel());
+        prompt.setPromptBody(request.getPromptBody());
         prompt.setVersionName("v" + (count + 1));
-        prompt.setIsActive(false);
-
-        if (activate) {
-            List<Prompt> prompts = promptRepository.findByLevel(prompt.getLevel());
-            prompts.forEach(p -> p.setIsActive(false));
-            promptRepository.saveAll(prompts);
-        }
+        prompt.setIsActive(request.getIsActive());
 
         promptRepository.save(prompt);
+
+        // NULL 방지
+        if (Boolean.TRUE.equals(request.getIsActive())) {
+            List<Prompt> existingPrompts = promptRepository.findByLevel(request.getLevel());
+            for (Prompt p : existingPrompts) {
+                if (!p.getId().equals(prompt.getId())) {
+                    p.setIsActive(false);
+                }
+            }
+            promptRepository.saveAll(existingPrompts);
+        }
 
         return new PromptResponse.FindById(prompt);
     }
