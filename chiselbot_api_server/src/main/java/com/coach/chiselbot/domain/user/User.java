@@ -2,10 +2,7 @@ package com.coach.chiselbot.domain.user;
 
 import com.coach.chiselbot._global.entity.BaseEntity;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 @Getter
 @Setter
@@ -13,6 +10,7 @@ import lombok.Setter;
 @AllArgsConstructor
 @Entity
 @Table(name = "user_table")
+@Builder
 public class User extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -26,6 +24,9 @@ public class User extends BaseEntity {
 
     @Column
     private String password;
+
+    @Enumerated(EnumType.STRING)
+    private Provider provider;
 
     /*
     @Enumerated(EnumType.STRING)

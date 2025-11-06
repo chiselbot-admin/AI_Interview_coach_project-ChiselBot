@@ -89,6 +89,11 @@ spring:
       cache:
         enabled: false
 
+oauth:
+  kakao:
+    client-id: ${KAKAO_CLIENT_ID}
+    redirect-uri: ${KAKAO_REDIRECT_URI}
+
 jwt:
-  secret: "VGhpc0lzQVNlY3JldEtleUZvckpXVFQxMjM0NTZBUElLRVkzNDQzMjE="
+  secret: ${JWT_SECRET}
   expiration-in-ms: 3600000 # 1시간

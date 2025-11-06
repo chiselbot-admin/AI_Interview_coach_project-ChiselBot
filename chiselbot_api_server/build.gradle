@@ -69,6 +69,8 @@ dependencies {
 
     // DB에 저장된 vector(String) 값을 float[]로 간편하게 변환하기 위해 사용
     implementation("com.google.code.gson:gson:2.10.1")
+
+    implementation 'me.paulschwarz:spring-dotenv:4.0.0'
 }
 
 dependencyManagement {

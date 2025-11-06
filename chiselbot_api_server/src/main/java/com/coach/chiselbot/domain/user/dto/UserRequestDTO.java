@@ -36,6 +36,7 @@ public class UserRequestDTO {
         @Pattern(regexp = "^[_a-z0-9-]+(.[_a-z0-9-]+)*@(?:\\w+\\.)+\\w+$", message = "유효한 이메일 형식이 아닙니다.")
         private String email;
         private String password;
+        private String authCode;
     }
 
     @Getter
