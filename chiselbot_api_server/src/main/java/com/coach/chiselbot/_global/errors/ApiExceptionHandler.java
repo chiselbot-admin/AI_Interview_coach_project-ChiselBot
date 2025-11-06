@@ -3,21 +3,31 @@ package com.coach.chiselbot._global.errors;
 import com.coach.chiselbot._global.dto.CommonResponseDto;
 import com.coach.chiselbot._global.errors.exception.Exception400;
 import com.coach.chiselbot._global.errors.exception.*;
+import com.coach.chiselbot.domain.kakao.RedirectRequiredException;
 import jakarta.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.annotation.Order;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
-@Order(2)
+import java.net.URI;
+
+@Order(0)
 @RestControllerAdvice
 public class ApiExceptionHandler {
 
     private static final Logger log = LoggerFactory.getLogger(ApiExceptionHandler.class);
 
+    @ExceptionHandler(RedirectRequiredException.class)
+    public ResponseEntity<Void> handleRedirect(RedirectRequiredException e) {
+        HttpHeaders headers = new HttpHeaders();
+        headers.setLocation(URI.create(e.getRedirectUrl()));
+        return new ResponseEntity<>(headers, HttpStatus.FOUND);
+    }
 
     @ExceptionHandler(Exception400.class)
     public ResponseEntity<?> ex400(Exception400 e, HttpServletRequest request) {
