@@ -1,7 +1,5 @@
 package com.coach.chiselbot.domain.interview_coach.prompt;
 
-
-
 import com.coach.chiselbot.domain.interview_coach.dto.FeedbackResponse;
 import com.coach.chiselbot.domain.interview_question.InterviewLevel;
 import com.coach.chiselbot.domain.interview_question.InterviewQuestion;
@@ -24,9 +22,10 @@ public class Level2PromptStrategy implements PromptStrategy{
 
         return prompt.getPromptBody().formatted(
                 question.getQuestionText(),
-                userAnswer,
-                similarity.getIntentSimilarity(),
-                similarity.getPointSimilarity()
+                question.getIntentText(),
+                question.getPointText(),
+                userAnswer
+
         );
     }
 

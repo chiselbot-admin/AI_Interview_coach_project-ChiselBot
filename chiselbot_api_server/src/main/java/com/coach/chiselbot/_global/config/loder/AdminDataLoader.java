@@ -19,6 +19,9 @@ import org.springframework.core.annotation.Order;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Component
 @RequiredArgsConstructor
 @Profile("local")
@@ -153,6 +156,7 @@ public class AdminDataLoader implements CommandLineRunner {
         }
 
         // 프롬프트 더미
+        List<Prompt> prompts = new ArrayList<>();
         Prompt prompt = new Prompt();
         prompt.setIsActive(true);
         prompt.setLevel(InterviewLevel.LEVEL_1);
@@ -179,6 +183,7 @@ public class AdminDataLoader implements CommandLineRunner {
                 "        코사인유사도: %.2f\n" +
                 "        ---\n" +
                 "        JSON:");
+        prompts.add(prompt);
         Prompt prompt2 = new Prompt();
         prompt2.setIsActive(false);
         prompt2.setLevel(InterviewLevel.LEVEL_1);
@@ -205,8 +210,43 @@ public class AdminDataLoader implements CommandLineRunner {
                 "        코사인유사도: %.2f\n" +
                 "        ---\n" +
                 "        JSON:");
+        prompts.add(prompt2);
 
-        promptRepository.save(prompt);
-        promptRepository.save(prompt2);
+        Prompt prompt3 = new Prompt();
+        prompt3.setIsActive(true);
+        prompt3.setLevel(InterviewLevel.LEVEL_2);
+        prompt3.setVersionName("v1");
+        prompt3.setPromptBody("너는 기술 면접 코치이다.  \n" +
+                "아래의 문제, 질문 의도, 핵심 포인트, 사용자의 답변을 보고  \n" +
+                "JSON 형식으로 간결한 피드백을 작성하라.  \n" +
+                "\n" +
+                "규칙:  \n" +
+                "1. 출력은 반드시 JSON 형식으로 해야 한다.  \n" +
+                "2. 항상 아래 여섯 개의 필드를 모두 포함하라:  \n" +
+                "   - \"feedback\": 사용자의 답변 전반에 대한 한문장 평가  \n" +
+                "   - \"hint\": 답변이 충분하지 않을 경우에만 작성 (짧은 한문장 조언)  \n" +
+                "   - \"grade\": 답변의 전반적 완성도를 \"상\", \"중\", \"하\" 중 하나로 평가  \n" +
+                "   - \"userAnswer\": 내용은 비워둔다  \n" +
+                "   - \"questionId\": 내용은 비워둔다  \n" +
+                "   - \"intentText\": 내용은 비워둔다  \n" +
+                "   - \"pointText\": 내용은 비워둔다  \n" +
+                "\n" +
+                "3. \"grade\"의 기준은 다음과 같다:  \n" +
+                "   - 상: 질문 의도와 핵심 포인트가 모두 잘 반영되어 답변이 정확하고 논리적일 때  \n" +
+                "   - 중: 질문 의도는 이해했지만 핵심 포인트 일부가 빠졌거나 표현이 다소 모호할 때  \n" +
+                "   - 하: 질문 의도나 핵심 포인트 중 하나라도 거의 반영되지 않았을 때  \n" +
+                "\n" +
+                "4. \"feedback\"과 \"hint\" 문장은 모두 **‘~요’로 끝나는 해요체 말투**로 작성한다.  \n" +
+                "5. 불필요한 설명이나 JSON 밖의 문장은 절대 포함하지 마라.  \n" +
+                "\n" +
+                "---  \n" +
+                "문제: %s  \n" +
+                "질문 의도(intent): %s  \n" +
+                "핵심 포인트(point): %s  \n" +
+                "사용자의 답변: %s  \n" +
+                "---  \n" +
+                "JSON:");
+        prompts.add(prompt3);
+        promptRepository.saveAll(prompts);
     }
 }

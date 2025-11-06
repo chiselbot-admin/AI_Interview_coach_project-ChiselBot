@@ -69,116 +69,117 @@ public class InterviewQuestionService {
         return questionOpt.map(QuestionResponse.FindById::fromEntity).orElse(null);
     }
 
-        // Admin - 질문등록 기능
-        public QuestionResponse.FindById createQuestion (QuestionRequest.CreateQuestion request){
+    // Admin - 질문등록 기능
+    public QuestionResponse.FindById createQuestion (QuestionRequest.CreateQuestion request){
 
-            InterviewCategory category = interviewCategoryRepository.findById(request.getCategoryId())
-                    .orElseThrow(() -> new AdminException404("해당 ID의 카테고리를 찾을 수 없습니다"));
+        InterviewCategory category = interviewCategoryRepository.findById(request.getCategoryId())
+                .orElseThrow(() -> new AdminException404("해당 ID의 카테고리를 찾을 수 없습니다"));
 
-            Admin admin = adminRepository.findById(request.getAdminId())
-                    .orElseThrow(() -> new AdminException404("해당 ID의 관리자를 찾을 수 없습니다"));
+        Admin admin = adminRepository.findById(request.getAdminId())
+                .orElseThrow(() -> new AdminException404("해당 ID의 관리자를 찾을 수 없습니다"));
 
-            InterviewQuestion newQuestion = new InterviewQuestion();
+        InterviewQuestion newQuestion = new InterviewQuestion();
 
-            newQuestion.setCategoryId(category);
-            newQuestion.setAdminId(admin);
-            newQuestion.setQuestionText(request.getQuestionText());
-            newQuestion.setInterviewLevel(request.getInterviewLevel());
+        newQuestion.setCategoryId(category);
+        newQuestion.setAdminId(admin);
+        newQuestion.setQuestionText(request.getQuestionText());
+        newQuestion.setInterviewLevel(request.getInterviewLevel());
 
-            // Level 1 문제일 때, answer과 answerVector 저장
-            if (request.getInterviewLevel() == InterviewLevel.LEVEL_1) {
-                newQuestion.setAnswerText(request.getAnswerText());
+        // Level 1 문제일 때, answer과 answerVector 저장
+        if (request.getInterviewLevel() == InterviewLevel.LEVEL_1) {
+            newQuestion.setAnswerText(request.getAnswerText());
 
-                if (request.getAnswerText() != null && !request.getAnswerText().isBlank()) {
-                    // 정답데이터 임베딩 후 gson 를 사용하여 Json 형태로 변환한 후 저장
-                    // 1. 임베딩
-                    float[] answerVector = embeddingService.embed(request.getAnswerText());
-                    // 2. gson 으로 String 형태의 Json 으로 변환
-                    String answerVectorJson = gson.toJson(answerVector);
-                    // 3. 저장
-                    newQuestion.setAnswerVector(answerVectorJson);
-                    questionRepository.save(newQuestion);
-                }
-            }
-            // Level 2 이상일 때, intent, point와 각각의 Vector 값을 저장
-            else {
-                newQuestion.setIntentText(request.getIntentText());
-                newQuestion.setPointText(request.getPointText());
-
-                if (request.getIntentText() != null && !request.getIntentText().isBlank() &&
-                        request.getPointText() != null && !request.getPointText().isBlank()) {
-                    // intentVector 임베딩 후 저장
-                    float[] intentVector = embeddingService.embed(request.getIntentText());
-                    String intentVectorJson = gson.toJson(intentVector);
-                    newQuestion.setIntentVector(intentVectorJson);
-
-                    // pointVector 임베딩 후 저장
-                    float[] pointVector = embeddingService.embed(request.getPointText());
-                    String pointVectorJson = gson.toJson(pointVector);
-                    newQuestion.setPointVector(pointVectorJson);
-                    questionRepository.save(newQuestion);
-                }
-            }
-            return new QuestionResponse.FindById(newQuestion);
-        }
-
-        // Admin - 질문 수정 기능
-        @Transactional
-        public QuestionResponse.FindById updateQuestion (QuestionRequest.UpdateQuestion request){
-            InterviewQuestion newQuestion = questionRepository.findById(request.getQuestionId())
-                    .orElseThrow(() -> new AdminException404("해당 질문을 찾을 수 없습니다"));
-
-            Admin newAdmin = adminRepository.findById(request.getAdminId())
-                    .orElseThrow(() -> new AdminException404("해당 관리자를 찾을 수 없습니다"));
-
-            InterviewCategory newCategory = interviewCategoryRepository.findById(request.getCategoryId())
-                    .orElseThrow(() -> new AdminException404("해당 카테고리를 찾을 수 없습니다"));
-
-            boolean intentChanged = isTextChanged(
-                    newQuestion.getIntentText(),
-                    request.getIntentText()
-            );
-            boolean pointChanged = isTextChanged(
-                    newQuestion.getPointText(),
-                    request.getPointText()
-            );
-            boolean answerChanged = isTextChanged(
-                    newQuestion.getAnswerText(),
-                    request.getAnswerText()
-            );
-
-
-            // 바뀐 값으로 수정
-            newQuestion.setQuestionText(request.getQuestionText());
-            newQuestion.setInterviewLevel(request.getInterviewLevel());
-            newQuestion.setAdminId(newAdmin);
-            newQuestion.setCategoryId(newCategory);
-
-            // Level1 이고 입력값이 바뀌었을 때
-            if (request.getInterviewLevel() == InterviewLevel.LEVEL_1 && answerChanged) {
-                newQuestion.setAnswerText(request.getAnswerText());
+            if (request.getAnswerText() != null && !request.getAnswerText().isBlank()) {
+                // 정답데이터 임베딩 후 gson 를 사용하여 Json 형태로 변환한 후 저장
+                // 1. 임베딩
                 float[] answerVector = embeddingService.embed(request.getAnswerText());
-                newQuestion.setAnswerVector(gson.toJson(answerVector));
-            } else if (request.getInterviewLevel() != InterviewLevel.LEVEL_1) { // Level이 1이 아닐 때
-                newQuestion.setIntentText(request.getIntentText());
-                newQuestion.setPointText(request.getPointText());
-
-                // 값들이 바뀌었을 때만 다시 임베딩
-                if (intentChanged) {
-                    float[] intentVector = embeddingService.embed(request.getIntentText());
-                    newQuestion.setIntentVector(gson.toJson(intentVector));
-                }
-                if (pointChanged) {
-                    float[] pointVector = embeddingService.embed(request.getPointText());
-                    newQuestion.setPointVector(gson.toJson(pointVector));
-                }
+                // 2. gson 으로 String 형태의 Json 으로 변환
+                String answerVectorJson = gson.toJson(answerVector);
+                // 3. 저장
+                newQuestion.setAnswerVector(answerVectorJson);
+                questionRepository.save(newQuestion);
             }
+        }
+        // Level 2 이상일 때, intent, point와 각각의 Vector 값을 저장
+        else {
+            newQuestion.setIntentText(request.getIntentText());
+            newQuestion.setPointText(request.getPointText());
 
-            questionRepository.save(newQuestion);
-            return new QuestionResponse.FindById(newQuestion);
+//                if (request.getIntentText() != null && !request.getIntentText().isBlank() &&
+//                        request.getPointText() != null && !request.getPointText().isBlank()) {
+//                    // intentVector 임베딩 후 저장
+//                    float[] intentVector = embeddingService.embed(request.getQuestionText());
+//                    String intentVectorJson = gson.toJson(intentVector);
+//                    newQuestion.setIntentVector(intentVectorJson);
+//
+//                    // pointVector 임베딩 후 저장
+//                    float[] pointVector = embeddingService.embed(request.getQuestionText()+" "+ request.getPointText());
+//                    String pointVectorJson = gson.toJson(pointVector);
+//                    newQuestion.setPointVector(pointVectorJson);
+                      questionRepository.save(newQuestion);
+//                }
+        }
+        return new QuestionResponse.FindById(newQuestion);
+    }
+
+    // Admin - 질문 수정 기능
+    @Transactional
+    public QuestionResponse.FindById updateQuestion (QuestionRequest.UpdateQuestion request){
+        InterviewQuestion newQuestion = questionRepository.findById(request.getQuestionId())
+                .orElseThrow(() -> new AdminException404("해당 질문을 찾을 수 없습니다"));
+
+        Admin newAdmin = adminRepository.findById(request.getAdminId())
+                .orElseThrow(() -> new AdminException404("해당 관리자를 찾을 수 없습니다"));
+
+        InterviewCategory newCategory = interviewCategoryRepository.findById(request.getCategoryId())
+                .orElseThrow(() -> new AdminException404("해당 카테고리를 찾을 수 없습니다"));
+
+        boolean intentChanged = isTextChanged(
+                newQuestion.getIntentText(),
+                request.getIntentText()
+        );
+        boolean pointChanged = isTextChanged(
+                newQuestion.getPointText(),
+                request.getPointText()
+        );
+        boolean answerChanged = isTextChanged(
+                newQuestion.getAnswerText(),
+                request.getAnswerText()
+        );
+
+
+        // 바뀐 값으로 수정
+        newQuestion.setQuestionText(request.getQuestionText());
+        newQuestion.setInterviewLevel(request.getInterviewLevel());
+        newQuestion.setAdminId(newAdmin);
+        newQuestion.setCategoryId(newCategory);
+
+        // Level1 이고 입력값이 바뀌었을 때
+        if (request.getInterviewLevel() == InterviewLevel.LEVEL_1 && answerChanged) {
+            newQuestion.setAnswerText(request.getAnswerText());
+            float[] answerVector = embeddingService.embed(request.getAnswerText());
+            newQuestion.setAnswerVector(gson.toJson(answerVector));
+        } else if (request.getInterviewLevel() != InterviewLevel.LEVEL_1) { // Level이 1이 아닐 때
+            newQuestion.setIntentText(request.getIntentText());
+            newQuestion.setPointText(request.getPointText());
+
+            // 값들이 바뀌었을 때만 다시 임베딩
+//            if (intentChanged) {
+//                float[] intentVector = embeddingService.embed(request.getIntentText());
+//                newQuestion.setIntentVector(gson.toJson(intentVector));
+//            }
+//            if (pointChanged) {
+//                float[] pointVector = embeddingService.embed(request.getPointText());
+//                newQuestion.setPointVector(gson.toJson(pointVector));
+//            }
         }
 
+        questionRepository.save(newQuestion);
+        return new QuestionResponse.FindById(newQuestion);
+    }
 
+
+    @Transactional
     public void deleteQuestion(Long questionId){
 
         // delete는 조회 없어도 오류 안떠서 question 조회 생략

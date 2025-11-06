@@ -5,6 +5,7 @@ import com.coach.chiselbot.domain.interview_coach.dto.FeedbackResponse;
 import com.coach.chiselbot.domain.interview_coach.feedback.FeedbackStrategy;
 import com.coach.chiselbot.domain.interview_coach.feedback.FeedbackStrategyFactory;
 import com.coach.chiselbot.domain.interview_coach.prompt.PromptFactory;
+import com.coach.chiselbot.domain.interview_question.InterviewLevel;
 import com.coach.chiselbot.domain.interview_question.InterviewQuestion;
 import com.coach.chiselbot.domain.interview_question.InterviewQuestionRepository;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -34,16 +35,19 @@ public class InterviewCoachService {
         System.out.println("문제 텍스트: " + question.getQuestionText());
         System.out.println("정답 텍스트: " + question.getAnswerText());
 
-        // 1. 유사도 계산
+
         FeedbackStrategy feedbackStrategy =
                 feedbackStrategyFactory.getStrategy(question.getInterviewLevel());
 
         FeedbackResponse.SimilarityResult similarity = feedbackStrategy.calculateSimilarity(feedbackRequest.getUserAnswer(), question);
 
-        similarity = new FeedbackResponse.SimilarityResult(
-                Double.parseDouble(String.format("%.2f", similarity.getIntentSimilarity())),
-                similarity.getPointSimilarity());
+        // 1. 유사도 계산 - Modify: LEVEL 1만 유사도 사용
+        if(question.getInterviewLevel() == InterviewLevel.LEVEL_1){
 
+            similarity = new FeedbackResponse.SimilarityResult(
+                    Double.parseDouble(String.format("%.2f", similarity.getIntentSimilarity())),
+                    similarity.getPointSimilarity());
+        }
 
         // 2. 프롬프트 생성
         String prompt = promptFactory.createPrompt(question, feedbackRequest.getUserAnswer(), similarity);
@@ -66,8 +70,14 @@ public class InterviewCoachService {
         try {
             result = objectMapper.readValue(aiAnswer, FeedbackResponse.FeedbackResult.class);
             result.setUserAnswer(feedbackRequest.getUserAnswer());
-            result.setQuestionAnswer(question.getAnswerText());
             result.setQuestionId(question.getQuestionId());
+            if(question.getInterviewLevel() == InterviewLevel.LEVEL_1){
+                result.setQuestionAnswer(question.getAnswerText());
+            }
+            else {
+                result.setIntentText(question.getIntentText());
+                result.setPointText(question.getPointText());
+            }
             System.out.println("ai답변 파싱 result: " + result.toString());
         } catch (JsonProcessingException e) {
             throw new RuntimeException("AI 응답 변환 실패: " + aiAnswer, e);
