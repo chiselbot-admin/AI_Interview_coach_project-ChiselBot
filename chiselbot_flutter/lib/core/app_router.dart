@@ -29,8 +29,8 @@ class RoutePaths {
   static const qnaNew = '/qna/new';
   static const qnaDetail = '/qna/detail';
   static const findIdPw = '/findIdPw';
-  static const emailLogin = '/emailLogin'; // EmailLoginScreen
-  static const onboarding = '/onboarding'; // OnboardingScreen
+  static const emailLogin = '/emailLogin';
+  static const onboarding = '/onboarding';
   static const storageList = '/storage';
   static const storageDetail = '/storage/detail';
   static const profileEdit = '/profile-edit';
@@ -89,9 +89,6 @@ class AppRouter {
         if (args is int) {
           return MaterialPageRoute(
               builder: (_) => QnaDetailScreen(inquiryId: args));
-        } else if (args is QnaDetailArgs) {
-          return MaterialPageRoute(
-              builder: (_) => QnaDetailScreen(inquiryId: args.inquiryId));
         } else {
           return _error('Invalid arguments for /qna/detail');
         }

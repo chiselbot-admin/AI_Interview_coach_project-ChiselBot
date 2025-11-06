@@ -137,9 +137,6 @@ final qnaChangeNotifierProvider = ChangeNotifierProvider<QnaProvider>((ref) {
   return QnaProvider(api);
 });
 
-// 현재 로그인한 관리자 ID (없으면 null, 있을때 1)
-final currentAdminIdProvider = StateProvider<int?>((ref) => 1);
-
 // 문의 목록
 final inquiriesProvider = FutureProvider<List<Inquiry>>((ref) async {
   final api = ref.read(apiServiceProvider);
@@ -172,19 +169,19 @@ final createInquiryProvider =
         () => CreateInquiryController());
 
 // 답변 등록(관리자) 컨트롤러
-class AnswerInquiryController extends AsyncNotifier<void> {
-  @override
-  Future<void> build() async {}
-
-  Future<void> submit({required int inquiryId, required String answer}) async {
-    state = const AsyncLoading();
-    final api = ref.read(apiServiceProvider);
-    state = await AsyncValue.guard(() async {
-      await api.answerInquiry(inquiryId: inquiryId, answer: answer);
-    });
-  }
-}
-
-final answerInquiryProvider =
-    AsyncNotifierProvider<AnswerInquiryController, void>(
-        () => AnswerInquiryController());
+// class AnswerInquiryController extends AsyncNotifier<void> {
+//   @override
+//   Future<void> build() async {}
+//
+//   Future<void> submit({required int inquiryId, required String answer}) async {
+//     state = const AsyncLoading();
+//     final api = ref.read(apiServiceProvider);
+//     state = await AsyncValue.guard(() async {
+//       await api.answerInquiry(inquiryId: inquiryId, answer: answer);
+//     });
+//   }
+// }
+//
+// final answerInquiryProvider =
+//     AsyncNotifierProvider<AnswerInquiryController, void>(
+//         () => AnswerInquiryController());

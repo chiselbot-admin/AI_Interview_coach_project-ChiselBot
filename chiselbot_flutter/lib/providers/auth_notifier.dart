@@ -31,7 +31,11 @@ final authRepositoryProvider = Provider<IAuthRepository>((ref) {
 final authNotifierProvider =
     StateNotifierProvider<AuthNotifier, AuthState>((ref) {
   final repository = ref.watch(authRepositoryProvider);
-  return AuthNotifier(repository);
+
+  // AuthApiService가 갖고 있는 ApiService를 뽑아서 전달
+  final api = ref.watch(authApiServiceProvider).api;
+
+  return AuthNotifier(repository, api);
 });
 
 final currentUserInfoProvider = Provider<(String, String)>((ref) {
@@ -51,8 +55,9 @@ final currentUserInfoProvider = Provider<(String, String)>((ref) {
 
 class AuthNotifier extends StateNotifier<AuthState> {
   final IAuthRepository _authRepository;
+  final ApiService _api;
 
-  AuthNotifier(this._authRepository) : super(const AuthState());
+  AuthNotifier(this._authRepository, this._api) : super(const AuthState());
 
   /// 로그인
   Future<void> login({
@@ -89,6 +94,9 @@ class AuthNotifier extends StateNotifier<AuthState> {
         name: result.name!,
         userId: result.userId,
       );
+
+      // ApiService에 토큰 주입
+      _api.setToken(result.token);
 
       // 4. 상태 업데이트 (성공)
       state = AuthState(
@@ -174,6 +182,10 @@ class AuthNotifier extends StateNotifier<AuthState> {
 
   /// 로그아웃
   Future<void> logout() async {
+    // ApiService에서 토큰 제거 — 헤더 Authorization 지우기
+    _api.setToken(null);
+
+    // 상태 비우기
     state = const AuthState.unauthenticated();
     debugPrint('[AUTH] 로그아웃');
   }

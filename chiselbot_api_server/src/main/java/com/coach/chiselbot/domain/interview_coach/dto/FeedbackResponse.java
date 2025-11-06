@@ -21,11 +21,16 @@ public class FeedbackResponse {
     @Setter
     public static class FeedbackResult{
         private Long questionId;
-        private double similarity;
+        private double similarity; // Level1용
         private String feedback;
         private String hint;
         private String userAnswer;
         private String questionAnswer;
+
+        // LEVEL2+ 확장
+        private String intentText;   // 질문 의도
+        private String pointText;    // 핵심 포인트
+        private String grade; //(상/중/하)
     }
 
 }

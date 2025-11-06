@@ -10,7 +10,10 @@ class QnaListScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final inquiriesAsync = ref.watch(inquiriesProvider);
-    final isAdmin = ref.watch(currentAdminIdProvider) != null;
+
+    // JWT 존재 여부로 로그인 판단
+    final api = ref.watch(apiServiceProvider);
+    final hasAuth = api.getHeaders().containsKey('Authorization');
 
     return Scaffold(
       appBar: AppBar(title: const Text('1:1 문의')),
@@ -20,9 +23,7 @@ class QnaListScreen extends ConsumerWidget {
             return const Center(child: Text('문의가 없습니다.'));
           }
           return RefreshIndicator(
-            onRefresh: () async {
-              ref.invalidate(inquiriesProvider);
-            },
+            onRefresh: () async => ref.invalidate(inquiriesProvider),
             child: ListView.builder(
               itemCount: list.length,
               itemBuilder: (_, i) => InquiryItem(
@@ -61,16 +62,26 @@ class QnaListScreen extends ConsumerWidget {
           ),
         ),
       ),
-      floatingActionButton: isAdmin
-          ? null
-          : FloatingActionButton.extended(
+      floatingActionButton: hasAuth
+          ? FloatingActionButton.extended(
               onPressed: () {
+                // 토큰 만료 등의 경우를 대비해 한 번 더 체크
+                final stillAuthed =
+                    api.getHeaders().containsKey('Authorization');
+                if (!stillAuthed) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('로그인 후 이용 가능합니다.')),
+                  );
+                  Navigator.pushNamed(context, '/login');
+                  return;
+                }
                 Navigator.pushNamed(context, '/qna/new')
                     .then((_) => ref.invalidate(inquiriesProvider));
               },
               icon: const Icon(Icons.edit),
               label: const Text('문의 작성'),
-            ),
+            )
+          : null,
     );
   }
 }

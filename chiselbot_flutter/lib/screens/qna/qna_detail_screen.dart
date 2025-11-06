@@ -12,27 +12,14 @@ class QnaDetailScreen extends ConsumerStatefulWidget {
 }
 
 class _QnaDetailScreenState extends ConsumerState<QnaDetailScreen> {
-  final _answerCtrl = TextEditingController();
-
-  @override
-  void dispose() {
-    _answerCtrl.dispose();
-    super.dispose();
-  }
-
   @override
   Widget build(BuildContext context) {
     final detailAsync = ref.watch(inquiryDetailProvider(widget.inquiryId));
-    final isAdmin = ref.watch(currentAdminIdProvider) != null;
 
     return Scaffold(
       appBar: AppBar(title: const Text('문의 상세')),
       body: detailAsync.when(
         data: (inq) {
-          final canAnswer = isAdmin &&
-              inq.status == InquiryStatus.WAITING &&
-              (inq.answerContent == null || inq.answerContent!.isEmpty);
-
           return Padding(
             padding: const EdgeInsets.all(14),
             child: ListView(
@@ -78,8 +65,6 @@ class _QnaDetailScreenState extends ConsumerState<QnaDetailScreen> {
                 else
                   Text('아직 답변이 없습니다.',
                       style: TextStyle(color: Colors.grey.shade600)),
-                const SizedBox(height: 16),
-                if (canAnswer) _buildAnswerBox(context, inq),
               ],
             ),
           );
@@ -87,55 +72,6 @@ class _QnaDetailScreenState extends ConsumerState<QnaDetailScreen> {
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (e, _) => Center(child: Text('오류: $e')),
       ),
-    );
-  }
-
-  Widget _buildAnswerBox(BuildContext context, Inquiry inq) {
-    final answerAsync = ref.watch(answerInquiryProvider);
-
-    Future<void> submit() async {
-      final txt = _answerCtrl.text.trim();
-      if (txt.isEmpty) {
-        ScaffoldMessenger.of(context)
-            .showSnackBar(const SnackBar(content: Text('답변을 입력하세요')));
-        return;
-      }
-      await ref
-          .read(answerInquiryProvider.notifier)
-          .submit(inquiryId: inq.inquiryId, answer: txt);
-      final st = ref.read(answerInquiryProvider);
-      if (st.hasError) {
-        ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text('등록 실패: ${st.error}')));
-      } else {
-        _answerCtrl.clear();
-        ref.invalidate(inquiryDetailProvider(inq.inquiryId));
-        ref.invalidate(inquiriesProvider);
-        ScaffoldMessenger.of(context)
-            .showSnackBar(const SnackBar(content: Text('답변이 등록되었습니다.')));
-      }
-    }
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        TextField(
-          controller: _answerCtrl,
-          maxLines: null,
-          decoration: const InputDecoration(
-            labelText: '관리자 답변 (1회)',
-            border: OutlineInputBorder(),
-          ),
-        ),
-        const SizedBox(height: 10),
-        ElevatedButton.icon(
-          icon: const Icon(Icons.reply),
-          label: answerAsync.isLoading
-              ? const Text('등록 중...')
-              : const Text('답변 등록'),
-          onPressed: answerAsync.isLoading ? null : submit,
-        ),
-      ],
     );
   }
 }
