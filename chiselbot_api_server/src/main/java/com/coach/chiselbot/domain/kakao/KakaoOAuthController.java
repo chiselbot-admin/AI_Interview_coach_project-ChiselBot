@@ -1,6 +1,7 @@
 package com.coach.chiselbot.domain.kakao;
 
 import com.coach.chiselbot._global.config.jwt.JwtTokenProvider;
+import com.coach.chiselbot._global.dto.CommonResponseDto;
 import com.coach.chiselbot.domain.user.User;
 import com.coach.chiselbot.domain.user.dto.UserRequestDTO;
 import com.coach.chiselbot.domain.user.login.LoginStrategy;
@@ -8,15 +9,14 @@ import com.coach.chiselbot.domain.user.login.LoginStrategyFactory;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.io.IOException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.util.Map;
 
 @RestController
 @RequiredArgsConstructor
@@ -58,4 +58,44 @@ public class KakaoOAuthController {
 
         response.sendRedirect("myapp:login?token=" + encodedToken);
     }
+
+	/**
+	 * Flutter SDK를 통한 카카오 로그인
+	 * POST /oauth/kakao/token
+	 */
+	@PostMapping("/token")
+	public ResponseEntity<CommonResponseDto<?>> loginWithAccessToken(
+			@RequestBody Map<String, String> request) {
+
+		String accessToken = request.get("accessToken");
+
+		if (accessToken == null || accessToken.isBlank()) {
+			return ResponseEntity.badRequest()
+					.body(CommonResponseDto.error("accessToken이 필요합니다."));
+		}
+
+		try {
+			LoginStrategy strategy = loginStrategyFactory.findStrategy("kakao");
+
+			UserRequestDTO.Login dto = new UserRequestDTO.Login();
+			dto.setAccessToken(accessToken);
+
+			User user = strategy.login(dto);
+			String token = jwtTokenProvider.createToken(user);
+
+			Map<String, Object> responseData = Map.of(
+					"userId", user.getId().toString(),
+					"name", user.getName(),
+					"token", token,
+					"profileImageUrl", user.getProfileImage()
+			);
+
+			return ResponseEntity.ok(CommonResponseDto.success(responseData, "로그인 성공"));
+
+		} catch (Exception e) {
+			return ResponseEntity.status(401)
+					.body(CommonResponseDto.error("카카오 로그인 실패: " + e.getMessage()));
+		}
+	}
+
 }

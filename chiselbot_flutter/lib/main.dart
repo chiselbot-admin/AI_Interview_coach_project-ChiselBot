@@ -1,5 +1,7 @@
-import '../providers/qna_provider.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:kakao_flutter_sdk_user/kakao_flutter_sdk_user.dart';
 
+import '../providers/qna_provider.dart';
 import '../providers/app_providers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -9,8 +11,23 @@ import 'core/app_theme.dart';
 import 'providers/theme_provider.dart';
 
 void main() async {
-  WidgetsFlutterBinding.ensureInitialized();
+  WidgetsFlutterBinding.ensureInitialized(); // FIRST
+  await printKeyHash();
+  await dotenv.load(fileName: ".env");
+  KakaoSdk.init(
+    nativeAppKey: dotenv.env['KAKAO_NATIVE_APP_KEY']!,
+  );
+
   runApp(const ProviderScope(child: Root()));
+}
+
+Future<void> printKeyHash() async {
+  try {
+    final keyHash = await KakaoSdk.origin;
+    print("현재 사용 중인 키 해시: $keyHash");
+  } catch (e) {
+    print("키 해시를 가져오는 중 오류 발생: $e");
+  }
 }
 
 class MyApp extends ConsumerWidget {

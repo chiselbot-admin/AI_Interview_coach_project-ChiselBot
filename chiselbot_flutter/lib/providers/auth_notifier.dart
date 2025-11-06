@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:kakao_flutter_sdk_user/kakao_flutter_sdk_user.dart';
 
 import '../models/auth/auth_state.dart';
 import '../models/user_model.dart';
@@ -38,18 +39,20 @@ final authNotifierProvider =
   return AuthNotifier(repository, api);
 });
 
-final currentUserInfoProvider = Provider<(String, String)>((ref) {
+final currentUserInfoProvider = Provider<(String, String, String?)>((ref) {
   final authState = ref.watch(authNotifierProvider);
 
   return authState.maybeWhen(
     (isLoading, isLoggedIn, user, token, errorMessage) {
       if (isLoggedIn && user != null) {
         final name = user.name?.isNotEmpty == true ? user.name! : '개발자';
-        return (name, user.email);
+        final String displayEmail =
+            user.email.contains('@') ? user.email : '# 카카오 로그인';
+        return (name, displayEmail, user.profileImageUrl);
       }
-      return ('개발자', '로그인해주세요');
+      return ('개발자', '로그인해주세요', null);
     },
-    orElse: () => ('개발자', '로그인해주세요'),
+    orElse: () => ('개발자', '로그인해주세요', null),
   );
 });
 
@@ -123,6 +126,76 @@ class AuthNotifier extends StateNotifier<AuthState> {
         ),
       );
       debugPrint('[AUTH] 로그인 실패: $e');
+      rethrow;
+    }
+  }
+
+  /// 카카오 로그인
+  Future<void> loginWithKakao() async {
+    state = state.when(
+      (isLoading, isLoggedIn, user, token, errorMessage) => AuthState(
+        isLoading: true,
+        isLoggedIn: isLoggedIn,
+        user: user,
+        token: token,
+        errorMessage: null,
+      ),
+      unauthenticated: () =>
+          const AuthState(isLoading: true, errorMessage: null),
+    );
+
+    try {
+      // 1. 카카오톡 설치 여부 확인
+      bool isInstalled = await isKakaoTalkInstalled();
+
+      OAuthToken token;
+      if (isInstalled) {
+        // 카카오톡으로 로그인
+        token = await UserApi.instance.loginWithKakaoTalk();
+      } else {
+        // 카카오 계정으로 로그인
+        token = await UserApi.instance.loginWithKakaoAccount();
+      }
+
+      // 2. 서버에 액세스 토큰 전송
+      final result = await _authRepository.loginWithKakao(
+        accessToken: token.accessToken,
+      );
+
+      // 3. 사용자 정보 생성
+      final user = UserModel(
+        email: result.userId.toString(),
+        password: '',
+        phoneNumber: '',
+        name: result.name ?? '카카오 사용자',
+        userId: result.userId,
+        profileImageUrl: result.profileImageUrl,
+      );
+
+      // 4. 상태 업데이트
+      state = AuthState(
+        isLoading: false,
+        isLoggedIn: true,
+        user: user,
+        token: result.token,
+      );
+
+      debugPrint('[AUTH] 카카오 로그인 성공: ${result.userId}');
+    } catch (e) {
+      state = state.when(
+        (isLoading, isLoggedIn, user, token, errorMessage) => AuthState(
+          isLoading: false,
+          isLoggedIn: isLoggedIn,
+          user: user,
+          token: token,
+          errorMessage: '카카오 로그인에 실패했습니다.',
+        ),
+        unauthenticated: () => const AuthState(
+          isLoading: false,
+          errorMessage: '카카오 로그인에 실패했습니다.',
+        ),
+      );
+      debugPrint('[AUTH] 카카오 로그인 실패: $e');
       rethrow;
     }
   }

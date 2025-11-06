@@ -13,21 +13,28 @@ class UserAvatar extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final (userName, _) = ref.watch(currentUserInfoProvider);
-
+    final (userName, _, profileImageUrl) = ref.watch(currentUserInfoProvider);
+    final bool hasProfileImage =
+        profileImageUrl != null && profileImageUrl.isNotEmpty;
+    final Color avatarBackgroundColor = hasProfileImage
+        ? Colors.transparent // 이미지가 있으면 투명
+        : _getPastelColor(userName); // 이미지가 없으면 파스텔 색상 사용
     return CircleAvatar(
       radius: radius,
-      backgroundColor: _getPastelColor(userName),
-      child: userName != '개발자'
-          ? Text(
-              userName[0].toUpperCase(),
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: radius * 0.8,
-                fontWeight: FontWeight.bold,
-              ),
-            )
-          : Icon(Icons.person, color: Colors.white, size: radius * 1.2),
+      backgroundColor: avatarBackgroundColor,
+      backgroundImage: hasProfileImage ? NetworkImage(profileImageUrl!) : null,
+      child: !hasProfileImage
+          ? (userName != '개발자'
+              ? Text(
+                  userName[0].toUpperCase(),
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: radius * 0.8,
+                    fontWeight: FontWeight.bold,
+                  ),
+                )
+              : Icon(Icons.person, color: Colors.white, size: radius * 1.2))
+          : null,
     );
   }
 

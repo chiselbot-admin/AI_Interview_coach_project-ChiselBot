@@ -1,18 +1,12 @@
 package com.coach.chiselbot._global.errors;
 
-import com.coach.chiselbot._global.errors.adminException.AdminException400;
 import com.coach.chiselbot._global.errors.adminException.*;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.annotation.Order;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.ControllerAdvice;
-import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.servlet.NoHandlerFoundException;
 
 @Slf4j
 @Order(1)
@@ -39,15 +33,15 @@ public class AdminExceptionHandler {
 //        return "err/401";
 //    }
 
-    @ExceptionHandler(AdminException401.class)
-    public String ex401ByData(AdminException401 e, HttpServletRequest request) {
-        log.warn("=== 401 UnAuthorized 에러 발생 ===");
-        log.warn("요청 URL : {}", request.getRequestURL());
-        log.warn("인증 오류: {}", e.getMessage());
-        log.warn("User-Agent: {}", request.getHeader("User-Agent"));
-        request.setAttribute("msg", e.getMessage());
-        return "redirect:/login-form";
-    }
+	@ExceptionHandler(AdminException401.class)
+	public String ex401ByData(AdminException401 e, HttpServletRequest request) {
+		log.warn("=== 401 UnAuthorized 에러 발생 ===");
+		log.warn("요청 URL : {}", request.getRequestURL());
+		log.warn("인증 오류: {}", e.getMessage());
+		log.warn("User-Agent: {}", request.getHeader("User-Agent"));
+		request.setAttribute("msg", e.getMessage());
+		return "redirect:/login-form";
+	}
 
 
 

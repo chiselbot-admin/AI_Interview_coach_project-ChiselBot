@@ -26,7 +26,8 @@ mixin _$UserModel {
   String get phoneNumber =>
       throw _privateConstructorUsedError; // 회원가입에 필요한 다른 필드들...
   String? get name => throw _privateConstructorUsedError;
-  String? get userId => throw _privateConstructorUsedError;
+  String? get userId => throw _privateConstructorUsedError; // 서버에서 생성된 ID (옵션)
+  String? get profileImageUrl => throw _privateConstructorUsedError;
 
   /// Serializes this UserModel to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
@@ -48,7 +49,8 @@ abstract class $UserModelCopyWith<$Res> {
       String password,
       String phoneNumber,
       String? name,
-      String? userId});
+      String? userId,
+      String? profileImageUrl});
 }
 
 /// @nodoc
@@ -71,6 +73,7 @@ class _$UserModelCopyWithImpl<$Res, $Val extends UserModel>
     Object? phoneNumber = null,
     Object? name = freezed,
     Object? userId = freezed,
+    Object? profileImageUrl = freezed,
   }) {
     return _then(_value.copyWith(
       email: null == email
@@ -93,6 +96,10 @@ class _$UserModelCopyWithImpl<$Res, $Val extends UserModel>
           ? _value.userId
           : userId // ignore: cast_nullable_to_non_nullable
               as String?,
+      profileImageUrl: freezed == profileImageUrl
+          ? _value.profileImageUrl
+          : profileImageUrl // ignore: cast_nullable_to_non_nullable
+              as String?,
     ) as $Val);
   }
 }
@@ -110,7 +117,8 @@ abstract class _$$UserModelImplCopyWith<$Res>
       String password,
       String phoneNumber,
       String? name,
-      String? userId});
+      String? userId,
+      String? profileImageUrl});
 }
 
 /// @nodoc
@@ -131,6 +139,7 @@ class __$$UserModelImplCopyWithImpl<$Res>
     Object? phoneNumber = null,
     Object? name = freezed,
     Object? userId = freezed,
+    Object? profileImageUrl = freezed,
   }) {
     return _then(_$UserModelImpl(
       email: null == email
@@ -153,6 +162,10 @@ class __$$UserModelImplCopyWithImpl<$Res>
           ? _value.userId
           : userId // ignore: cast_nullable_to_non_nullable
               as String?,
+      profileImageUrl: freezed == profileImageUrl
+          ? _value.profileImageUrl
+          : profileImageUrl // ignore: cast_nullable_to_non_nullable
+              as String?,
     ));
   }
 }
@@ -165,7 +178,8 @@ class _$UserModelImpl implements _UserModel {
       required this.password,
       required this.phoneNumber,
       this.name,
-      this.userId});
+      this.userId,
+      this.profileImageUrl});
 
   factory _$UserModelImpl.fromJson(Map<String, dynamic> json) =>
       _$$UserModelImplFromJson(json);
@@ -182,10 +196,13 @@ class _$UserModelImpl implements _UserModel {
   final String? name;
   @override
   final String? userId;
+// 서버에서 생성된 ID (옵션)
+  @override
+  final String? profileImageUrl;
 
   @override
   String toString() {
-    return 'UserModel(email: $email, password: $password, phoneNumber: $phoneNumber, name: $name, userId: $userId)';
+    return 'UserModel(email: $email, password: $password, phoneNumber: $phoneNumber, name: $name, userId: $userId, profileImageUrl: $profileImageUrl)';
   }
 
   @override
@@ -199,13 +216,15 @@ class _$UserModelImpl implements _UserModel {
             (identical(other.phoneNumber, phoneNumber) ||
                 other.phoneNumber == phoneNumber) &&
             (identical(other.name, name) || other.name == name) &&
-            (identical(other.userId, userId) || other.userId == userId));
+            (identical(other.userId, userId) || other.userId == userId) &&
+            (identical(other.profileImageUrl, profileImageUrl) ||
+                other.profileImageUrl == profileImageUrl));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode =>
-      Object.hash(runtimeType, email, password, phoneNumber, name, userId);
+  int get hashCode => Object.hash(
+      runtimeType, email, password, phoneNumber, name, userId, profileImageUrl);
 
   /// Create a copy of UserModel
   /// with the given fields replaced by the non-null parameter values.
@@ -229,7 +248,8 @@ abstract class _UserModel implements UserModel {
       required final String password,
       required final String phoneNumber,
       final String? name,
-      final String? userId}) = _$UserModelImpl;
+      final String? userId,
+      final String? profileImageUrl}) = _$UserModelImpl;
 
   factory _UserModel.fromJson(Map<String, dynamic> json) =
       _$UserModelImpl.fromJson;
@@ -243,7 +263,9 @@ abstract class _UserModel implements UserModel {
   @override
   String? get name;
   @override
-  String? get userId;
+  String? get userId; // 서버에서 생성된 ID (옵션)
+  @override
+  String? get profileImageUrl;
 
   /// Create a copy of UserModel
   /// with the given fields replaced by the non-null parameter values.

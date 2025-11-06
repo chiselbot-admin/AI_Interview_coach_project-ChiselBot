@@ -1,20 +1,22 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 import '../core/app_router.dart';
+import '../providers/auth_notifier.dart';
 
-class LoginScreen extends StatelessWidget {
+class LoginScreen extends ConsumerWidget {
   const LoginScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return Scaffold(
       // backgroundColor: Colors.black,
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            _buildKakaoLoginButton(),
+            _buildKakaoLoginButton(context, ref),
             const SizedBox(height: 16),
             _buildGoogleLoginButton(),
             const SizedBox(height: 16),
@@ -25,11 +27,22 @@ class LoginScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildKakaoLoginButton() {
+  Widget _buildKakaoLoginButton(BuildContext context, WidgetRef ref) {
     final imgAddress = 'assets/images/kakao_login_black.png';
     return InkWell(
-      onTap: () {
-        //
+      onTap: () async {
+        try {
+          await ref.read(authNotifierProvider.notifier).loginWithKakao();
+          if (context.mounted) {
+            Navigator.pushReplacementNamed(context, RoutePaths.main);
+          }
+        } catch (e) {
+          if (context.mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text('카카오 로그인 실패: $e')),
+            );
+          }
+        }
       },
       child: Container(
         height: 42,
@@ -98,10 +111,7 @@ class LoginScreen extends StatelessWidget {
   Widget _buildEmailLoginButton(BuildContext context) {
     return InkWell(
       onTap: () {
-        Navigator.pushNamed(
-          context,
-          RoutePaths.emailLogin,
-        );
+        Navigator.pushNamed(context, RoutePaths.emailLogin);
       },
       child: Container(
         height: 40,

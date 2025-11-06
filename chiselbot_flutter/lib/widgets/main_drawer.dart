@@ -11,7 +11,7 @@ class MainDrawer extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final (userName, userEmail) = ref.watch(currentUserInfoProvider);
+    final (userName, userEmail, _) = ref.watch(currentUserInfoProvider);
     final screenWidth = MediaQuery.of(context).size.width;
     final state = ref.watch(storageListProvider);
     return Drawer(

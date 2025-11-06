@@ -12,6 +12,16 @@ if (localPropertiesFile.exists()) {
     localProperties.load(new FileInputStream(localPropertiesFile))
 }
 
+// .env 파일 읽기 추가
+def envProperties = new Properties()
+def envFile = rootProject.file('../../.env')  // Flutter 루트의 .env
+if (envFile.exists()) {
+    envFile.withReader('UTF-8') { reader ->
+        envProperties.load(reader)
+    }
+}
+
+
 android {
     namespace = "com.example.ai_interview"
     compileSdk = flutter.compileSdkVersion
@@ -36,10 +46,12 @@ android {
         versionCode = flutter.versionCode
         versionName = flutter.versionName
 
-        // manifestPlaceholders 추가
-//        manifestPlaceholders = [
-//                KAKAO_NATIVE_APP_KEY: localProperties.getProperty('KAKAO_NATIVE_APP_KEY')
-//        ]
+        // .env 또는 local.properties에서 키 읽기
+        def kakaoKey = envProperties.getProperty('KAKAO_NATIVE_APP_KEY')
+                ?: localProperties.getProperty('KAKAO_NATIVE_APP_KEY')
+                ?: ''
+
+        manifestPlaceholders = [KAKAO_NATIVE_APP_KEY: kakaoKey]
 
     }
 

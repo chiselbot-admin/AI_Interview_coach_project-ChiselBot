@@ -30,23 +30,33 @@ public class KakaoLoginStrategy implements LoginStrategy {
     private final UserJpaRepository userJpaRepository;
     private final PasswordEncoder passwordEncoder;
 
-    @Override
-    public User login(UserRequestDTO.Login dto) {
-        if (dto.getAuthCode() == null || dto.getAuthCode().isBlank()) {
-            String kakaoAuthUrl = UriComponentsBuilder
-                    .fromUriString("https://kauth.kakao.com/oauth/authorize")
-                    .queryParam("response_type", "code")
-                    .queryParam("client_id", clientId)
-                    .queryParam("redirect_uri", redirectUri)
-                    .build()
-                    .toUriString();
+	@Override
+	public User login(UserRequestDTO.Login dto) {
+		String accessToken;
 
-            throw new RedirectRequiredException(kakaoAuthUrl);
-        }
+		// 1. accessToken이 직접 넘어온 경우 (Flutter SDK 방식)
+		if (dto.getAccessToken() != null && !dto.getAccessToken().isBlank()) {
+			accessToken = dto.getAccessToken();
+		}
+		// 2. authCode가 넘어온 경우 (기존 웹 방식)
+		else if (dto.getAuthCode() != null && !dto.getAuthCode().isBlank()) {
+			accessToken = kakaoOAuthClient.getAccessToken(dto.getAuthCode());
+		}
+		// 3. 둘 다 없으면 리다이렉트
+		else {
+			String kakaoAuthUrl = UriComponentsBuilder
+					.fromUriString("https://kauth.kakao.com/oauth/authorize")
+					.queryParam("response_type", "code")
+					.queryParam("client_id", clientId)
+					.queryParam("redirect_uri", redirectUri)
+					.build()
+					.toUriString();
 
-        String accessToken = kakaoOAuthClient.getAccessToken(dto.getAuthCode());
+			throw new RedirectRequiredException(kakaoAuthUrl);
+		}
 
-        KakaoUserInfoResponseDto kakaoUser = kakaoOAuthClient.getUserInfo(accessToken);
+		// 카카오 사용자 정보 조회
+		KakaoUserInfoResponseDto kakaoUser = kakaoOAuthClient.getUserInfo(accessToken);
 
         String rawEmail = kakaoUser.getKakaoAccount().getEmail();
         String nickname = kakaoUser.getKakaoAccount().getProfile().getNickName();

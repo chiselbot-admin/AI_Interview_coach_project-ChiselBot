@@ -96,4 +96,9 @@ class AuthRepository implements IAuthRepository {
   Future<String> findEmailByName({required String name}) async {
     return await authApiService.findEmailByName(name: name);
   }
+
+  @override
+  Future<AuthResultModel> loginWithKakao({required String accessToken}) async {
+    return await authApiService.loginWithKakao(accessToken: accessToken);
+  }
 }

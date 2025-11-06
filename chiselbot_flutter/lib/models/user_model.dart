@@ -13,6 +13,7 @@ class UserModel with _$UserModel {
     // 회원가입에 필요한 다른 필드들...
     String? name,
     String? userId, // 서버에서 생성된 ID (옵션)
+    String? profileImageUrl,
   }) = _UserModel;
 
   factory UserModel.fromJson(Map<String, dynamic> json) =>

@@ -38,4 +38,6 @@ abstract class IAuthRepository {
     required String token,
     required UserUpdateRequestModel request,
   });
+
+  Future<AuthResultModel> loginWithKakao({required String accessToken});
 }

@@ -12,6 +12,7 @@ class AuthResultModel with _$AuthResultModel {
     // 아이디 찾기 성공 시
     String? name,
     String? foundId,
+    String? profileImageUrl,
     // 비밀번호 찾기 성공 시
     String? resetToken,
   }) = _AuthResultModel;

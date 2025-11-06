@@ -229,4 +229,32 @@ class AuthApiService {
       throw Exception(errorMessage);
     }
   }
+
+  /// 카카오 액세스 토큰으로 로그인
+  Future<AuthResultModel> loginWithKakao({required String accessToken}) async {
+    const String path = '/oauth/kakao/token';
+
+    try {
+      final Response<Map<String, dynamic>> response =
+          await _authClient.dio.post(
+        path,
+        data: {'accessToken': accessToken},
+      );
+
+      final Map<String, dynamic> responseData = response.data!;
+      final Map<String, dynamic> dataMap =
+          responseData['data'] as Map<String, dynamic>;
+      final AuthResultModel authResult = AuthResultModel.fromJson(dataMap);
+
+      if (authResult.token != null) {
+        _apiService.setToken(authResult.token);
+      }
+      return authResult;
+    } on DioException catch (e) {
+      final responseData = e.response?.data;
+      final String errorMessage =
+          responseData?['message'] ?? '카카오 로그인에 실패했습니다.';
+      throw Exception(errorMessage);
+    }
+  }
 }
