@@ -28,6 +28,9 @@ public class User extends BaseEntity {
     @Column
     private String profileImage;
 
+    @Column(unique = true)
+    private String kakaoId; // 카카오 고유 ID
+
     @Enumerated(EnumType.STRING)
     private Provider provider;
 

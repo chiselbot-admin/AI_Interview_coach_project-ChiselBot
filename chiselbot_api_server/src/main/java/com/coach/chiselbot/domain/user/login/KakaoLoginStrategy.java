@@ -47,11 +47,12 @@ public class KakaoLoginStrategy implements LoginStrategy {
         String email = kakaoUser.getKakaoAccount().getEmail();
         String nickname = kakaoUser.getKakaoAccount().getProfile().getNickName();
         String profileImageUrl = kakaoUser.getKakaoAccount().getProfile().getProfileImageUrl();
-
+        String kakaoId = String.valueOf(kakaoUser.getId());
 
         return userJpaRepository.findByEmail(email)
                 .orElseGet(() -> userJpaRepository.save(
                         User.builder()
+                                .kakaoId(kakaoId)
                                 .email(email)
                                 .name(nickname)
                                 .profileImage(profileImageUrl)
@@ -62,7 +63,6 @@ public class KakaoLoginStrategy implements LoginStrategy {
 
     @Override
     public boolean supports(String type) {
-        return "kakao" .equalsIgnoreCase(type);
+        return "kakao".equalsIgnoreCase(type);
     }
 }
-

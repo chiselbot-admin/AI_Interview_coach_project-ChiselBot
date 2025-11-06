@@ -27,6 +27,7 @@ public class UserDataLoader implements CommandLineRunner {
                 "유저1",
                 "test1@naver.com",
                 passwordEncoder.encode("1234"),
+                null,
                 null
                 , Provider.LOCAL));
 
@@ -36,6 +37,7 @@ public class UserDataLoader implements CommandLineRunner {
                 "test2@naver.com",
                 passwordEncoder.encode("1234"),
                 null,
+                null,
                 Provider.LOCAL));
 
 
@@ -44,6 +46,7 @@ public class UserDataLoader implements CommandLineRunner {
                         "유저3",
                         "test3@naver.com",
                         passwordEncoder.encode("1234"),
+                        null,
                         null,
                         Provider.LOCAL
                 )

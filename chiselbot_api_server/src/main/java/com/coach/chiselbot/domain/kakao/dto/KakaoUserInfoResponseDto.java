@@ -5,9 +5,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-import java.util.Date;
-import java.util.HashMap;
-
 /**
  * 카카오 사용자 정보 API (/v2/user/me) 응답을 매핑하는 DTO
  * https://developers.kakao.com/docs/latest/ko/kakaologin/rest-api#req-user-info
@@ -21,17 +18,9 @@ public class KakaoUserInfoResponseDto {
     @JsonProperty("id")
     private Long id;
 
-    // 서비스에 연결 완료된 시각
-    @JsonProperty("connected_at")
-    private Date connectedAt;
-
     // 카카오 계정 정보
     @JsonProperty("kakao_account")
     private KakaoAccount kakaoAccount;
-
-    // 사용자 프로퍼티 (커스텀 프로필 등)
-    @JsonProperty("properties")
-    private HashMap<String, String> properties;
 
     @Getter
     @NoArgsConstructor
@@ -50,18 +39,6 @@ public class KakaoUserInfoResponseDto {
         @JsonProperty("email")
         private String email;
 
-        // 성별
-        @JsonProperty("gender")
-        private String gender;
-
-        // 연령대
-        @JsonProperty("age_range")
-        private String ageRange;
-
-        // 전화번호
-        @JsonProperty("phone_number")
-        private String phoneNumber;
-
         @Getter
         @NoArgsConstructor
         @JsonIgnoreProperties(ignoreUnknown = true)
@@ -71,9 +48,6 @@ public class KakaoUserInfoResponseDto {
 
             @JsonProperty("profile_image_url")
             private String profileImageUrl;
-
-            @JsonProperty("thumbnail_image_url")
-            private String thumbnailImageUrl;
         }
     }
 }
