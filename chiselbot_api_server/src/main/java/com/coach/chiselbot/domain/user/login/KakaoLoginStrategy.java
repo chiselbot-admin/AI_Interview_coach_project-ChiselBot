@@ -9,8 +9,11 @@ import com.coach.chiselbot.domain.user.UserJpaRepository;
 import com.coach.chiselbot.domain.user.dto.UserRequestDTO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.util.UriComponentsBuilder;
+
+import java.util.UUID;
 
 @Component
 @RequiredArgsConstructor
@@ -25,6 +28,7 @@ public class KakaoLoginStrategy implements LoginStrategy {
 
     private final KakaoOAuthClient kakaoOAuthClient;
     private final UserJpaRepository userJpaRepository;
+    private final PasswordEncoder passwordEncoder;
 
 	@Override
 	public User login(UserRequestDTO.Login dto) {
@@ -54,21 +58,33 @@ public class KakaoLoginStrategy implements LoginStrategy {
 		// 카카오 사용자 정보 조회
 		KakaoUserInfoResponseDto kakaoUser = kakaoOAuthClient.getUserInfo(accessToken);
 
-        String email = kakaoUser.getKakaoAccount().getEmail();
+        String rawEmail = kakaoUser.getKakaoAccount().getEmail();
         String nickname = kakaoUser.getKakaoAccount().getProfile().getNickName();
         String profileImageUrl = kakaoUser.getKakaoAccount().getProfile().getProfileImageUrl();
         String kakaoId = String.valueOf(kakaoUser.getId());
+
+        String safeEmail = (rawEmail == null || rawEmail.isBlank())
+                ? "kakao_" + kakaoId + "@placeholder.kakao"
+                : rawEmail;
+
+        final String email = safeEmail;
+
+        String randomPassword = UUID.randomUUID().toString();
+
+        String encodedPassword = passwordEncoder.encode(randomPassword);
 
         return userJpaRepository.findByEmail(email)
                 .orElseGet(() -> userJpaRepository.save(
                         User.builder()
                                 .kakaoId(kakaoId)
                                 .email(email)
+                                .password(encodedPassword)
                                 .name(nickname)
                                 .profileImage(profileImageUrl)
                                 .provider(Provider.KAKAO)
                                 .build()
                 ));
+
     }
 
     @Override

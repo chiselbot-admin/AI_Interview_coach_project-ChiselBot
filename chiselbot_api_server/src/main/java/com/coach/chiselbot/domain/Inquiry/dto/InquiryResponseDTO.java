@@ -132,7 +132,7 @@ public class InquiryResponseDTO {
                     .content(inquiry.getContent())
                     .status(inquiry.getStatus())
                     .userName(inquiry.getUser().getName())
-                    .answerContent(answer != null ? answer.getContent() : "답변이 없습니다.")
+                    .answerContent(answer != null ? answer.getContent() : null)
                     .createdAt(inquiry.getCreatedAt())
                     .answeredAt(answer != null ? answer.getCreatedAt() : null)
                     .build();

@@ -64,7 +64,7 @@
                     {{/inquiry.answerContent}}
                     {{#inquiry.answerContent}}
                         <div class="text-end">
-                            <a href="/admin/inquiry/{{inquiry.answerId}}/update-form" class="btn btn-outline-warning">
+                            <a href="/admin/inquiry/{{#inquiry.answerId}}{{inquiry.answerId}}{{/inquiry.answerId}}/update-form" class="btn btn-outline-warning">
                                 답변 수정
                             </a>
                             <a href="/admin/inquiries" class="btn btn-secondary ms-2">
