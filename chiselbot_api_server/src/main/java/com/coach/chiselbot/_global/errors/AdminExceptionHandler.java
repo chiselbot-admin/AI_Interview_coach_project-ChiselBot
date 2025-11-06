@@ -8,6 +8,7 @@ import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -15,7 +16,7 @@ import org.springframework.web.servlet.NoHandlerFoundException;
 
 @Slf4j
 @Order(1)
-@ControllerAdvice
+@ControllerAdvice(annotations = Controller.class)
 public class AdminExceptionHandler {
 
     @ExceptionHandler
