@@ -31,7 +31,8 @@ class SimilarityBars extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final double intent = fb.similarity.clamp(0.0, 1.0).toDouble();
+    final double intent =
+        (fb.similarity ?? 0.0).clamp(0.0, 1.0).toDouble(); // null safe
     final double kw = (fb.questionAnswer != null)
         ? _keywordCoverage(fb.questionAnswer!, fb.userAnswer)
             .clamp(0.0, 1.0)

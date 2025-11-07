@@ -31,6 +31,9 @@ public class UserStorage extends BaseEntity {
     private String userAnswer;
     private String feedback;
     private String hint;
-    private double similarity;
+    private Double similarity;
+
+    @Column(length = 10)
+    private String grade;
 
 }

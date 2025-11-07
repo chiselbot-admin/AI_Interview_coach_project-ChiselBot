@@ -36,7 +36,7 @@ public class UserStorageService {
         newStorage.setHint(request.getHint());
         newStorage.setUserAnswer(request.getUserAnswer());
         newStorage.setSimilarity(request.getSimilarity());
-
+        newStorage.setGrade(request.getGrade());
         storageRepository.save(newStorage);
 
         return new StorageResponse.FindById(newStorage);

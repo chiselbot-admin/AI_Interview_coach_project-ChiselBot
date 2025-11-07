@@ -58,23 +58,44 @@ extension StorageApi on ApiService {
   Future<StorageDetail> saveStorage({
     required int questionId,
     required String userAnswer,
-    required double similarity,
+    double? similarity, // L1에서만 사용
     String feedback = '',
     String hint = '',
-    String? questionAnswer,
+    String? questionAnswer, // L1에서만 사용
+    String? level, // 'LEVEL_1' | 'LEVEL_2'
+    String? grade, // L2: 상/중/하
+    String? intentText, // L2: 질문 의도
+    String? pointText, // L2: 핵심 포인트(멀티라인 가능)
   }) async {
     final uri = Uri.parse('$baseUrl/api/storages/storage/save');
+
+    // 필수 + 선택 파라미터를 payload에 조건부로 담기
+    final payload = <String, dynamic>{
+      'questionId': questionId,
+      'userAnswer': userAnswer,
+      'feedback': feedback,
+      'hint': hint,
+    };
+
+    // L1 전용
+    if (similarity != null) payload['similarity'] = similarity;
+    if (questionAnswer != null) payload['questionAnswer'] = questionAnswer;
+
+    // 공통/식별
+    if (level != null) {
+      payload['level'] = level;
+      payload['interviewLevel'] = level;
+    }
+
+    // L2 전용
+    if (grade != null) payload['grade'] = grade;
+    if (intentText != null) payload['intentText'] = intentText;
+    if (pointText != null) payload['pointText'] = pointText;
+
     final res = await http.post(
       uri,
-      headers: getHeaders(), // JSON 본문
-      body: jsonEncode({
-        'questionId': questionId,
-        'userAnswer': userAnswer,
-        'similarity': similarity,
-        'feedback': feedback,
-        'hint': hint,
-        'questionAnswer': questionAnswer,
-      }),
+      headers: getHeaders(),
+      body: jsonEncode(payload),
     );
 
     if (res.statusCode == 401 || res.statusCode == 403) {
@@ -88,8 +109,8 @@ extension StorageApi on ApiService {
           res.body.length > 200 ? res.body.substring(0, 200) : res.body;
       throw Exception('보관함 저장 실패 (HTTP ${res.statusCode}) $preview');
     }
-    _ensureJson(res);
 
+    _ensureJson(res);
     final m = jsonDecode(res.body);
     final data = (m is Map && m['success'] == true) ? m['data'] : m;
     return StorageDetail.fromJson(data as Map<String, dynamic>);

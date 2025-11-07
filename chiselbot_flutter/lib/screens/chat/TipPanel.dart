@@ -1,23 +1,24 @@
 import 'package:flutter/material.dart';
 
-class ModelWithDiff extends StatelessWidget {
-  final String model;
-  final String user;
-  const ModelWithDiff({super.key, required this.model, required this.user});
+class TipPanel extends StatelessWidget {
+  final String tip;
+  const TipPanel({super.key, required this.tip});
 
   @override
   Widget build(BuildContext context) {
+    if (tip.trim().isEmpty) {
+      return const SizedBox.shrink();
+    }
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(12),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text('모범답안', style: TextStyle(fontWeight: FontWeight.bold)),
+            const Text('TIP', style: TextStyle(fontWeight: FontWeight.bold)),
             const SizedBox(height: 8),
             SelectableText(
-              model,
-              textAlign: TextAlign.start,
+              tip,
               style: const TextStyle(height: 1.35),
             ),
           ],

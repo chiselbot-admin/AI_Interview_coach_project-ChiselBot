@@ -28,20 +28,6 @@ public abstract class AbstractFeedbackStrategy implements FeedbackStrategy {
         return dot / (Math.sqrt(normA) * Math.sqrt(normB));
     }
 
-    // 코사인 유사도 계산 함수 (널/길이 방어)
-//    protected double cosineSimilarity(float[] a, float[] b) {
-//        if (a == null || b == null || a.length == 0 || b.length == 0) return 0.0;
-//        int n = Math.min(a.length, b.length);
-//        double dot = 0, normA = 0, normB = 0;
-//        for (int i = 0; i < n; i++) {
-//            dot += a[i] * b[i];
-//            normA += a[i] * a[i];
-//            normB += b[i] * b[i];
-//        }
-//        double denom = Math.sqrt(normA) * Math.sqrt(normB);
-//        return denom == 0 ? 0.0 : dot / denom;
-//    }
-
     // 추상메서드로 그대로 하위클래스에 넘겨줌
     public abstract FeedbackResponse.SimilarityResult calculateSimilarity(String userAnswer, InterviewQuestion question);
 

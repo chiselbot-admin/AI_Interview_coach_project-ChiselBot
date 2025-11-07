@@ -56,55 +56,103 @@ class StorageDetailScreen extends ConsumerWidget {
       body: async.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (e, _) => Center(child: Text('불러올 수 없습니다: $e')),
-        data: (d) => Padding(
-          padding: const EdgeInsets.all(16),
-          child: ListView(
-            children: [
-              // 헤더 카드
-              Card(
-                elevation: 0,
-                color: Colors.white.withOpacity(0.04),
-                child: Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        d.questionText.isNotEmpty
-                            ? d.questionText
-                            : '질문 #${d.questionId}',
-                        style: Theme.of(context).textTheme.titleLarge,
-                      ),
-                      const SizedBox(height: 6),
-                      Text(
-                        '${_friendlyDateTime(d.createdAt)} · ${d.interviewLevel} · ${d.categoryName}',
-                        style: Theme.of(context).textTheme.bodySmall,
-                      ),
-                    ],
+        data: (d) {
+          // 레벨 판별 (level 없으면 interviewLevel로 폴백)
+          final level = (d.level ?? d.interviewLevel ?? '').toUpperCase();
+          final isL2 = level == 'LEVEL_2';
+
+          // 헤더 타이틀: questionText가 없으면 '질문 #id'
+          final titleText = (d.questionText?.isNotEmpty == true)
+              ? d.questionText!
+              : '질문 #${d.questionId}';
+
+          // 서브 정보: 날짜/레벨/카테고리(없으면 대체)
+          final metaDate = _friendlyDateTimeOrDash(d.createdAt);
+          final metaLevel =
+              level.isNotEmpty ? level : (d.interviewLevel ?? '—');
+          final metaCate =
+              (d.categoryName?.isNotEmpty == true) ? d.categoryName! : '—';
+          final metaLine = '$metaDate · $metaLevel · $metaCate';
+
+          return Padding(
+            padding: const EdgeInsets.all(16),
+            child: ListView(
+              children: [
+                // 헤더 카드
+                Card(
+                  elevation: 0,
+                  color: Colors.white.withOpacity(0.04),
+                  child: Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(titleText,
+                            style: Theme.of(context).textTheme.titleLarge),
+                        const SizedBox(height: 6),
+                        Text(metaLine,
+                            style: Theme.of(context).textTheme.bodySmall),
+                      ],
+                    ),
                   ),
                 ),
-              ),
-              const SizedBox(height: 16),
+                const SizedBox(height: 16),
 
-              _section(context, title: '내 답변', body: d.userAnswer),
-              const SizedBox(height: 12),
-              _section(context,
-                  title: '피드백', body: d.feedback.isNotEmpty ? d.feedback : '—'),
-              const SizedBox(height: 12),
-              // _section(context,
-              //     title: '힌트', body: d.hint.isNotEmpty ? d.hint : '—'),
-              // const SizedBox(height: 12),
-              if (d.questionAnswer.isNotEmpty) ...[
+                // 공통: 내 답변
+                _section(context, title: '내 답변', body: d.userAnswer),
+
                 const SizedBox(height: 12),
-                _section(context, title: '모범답안', body: d.questionAnswer),
+
+                if (!isL2) ...[
+                  // ===== LEVEL_1 전용 =====
+                  _section(
+                    context,
+                    title: '피드백',
+                    body: (d.feedback?.isNotEmpty == true) ? d.feedback! : '—',
+                  ),
+                  const SizedBox(height: 12),
+
+                  if (d.questionAnswer?.isNotEmpty == true) ...[
+                    _section(context, title: '모범답안', body: d.questionAnswer!),
+                    const SizedBox(height: 12),
+                  ],
+
+                  if (d.similarity != null)
+                    _SimilarityGauge(value: d.similarity!),
+                ] else ...[
+                  // ===== LEVEL_2 전용 =====
+                  _kvCard(context, '등급',
+                      (d.grade?.isNotEmpty == true) ? d.grade! : '—'),
+                  const SizedBox(height: 12),
+
+                  _section(
+                    context,
+                    title: '핵심 피드백',
+                    body: (d.feedback?.isNotEmpty == true) ? d.feedback! : '—',
+                  ),
+                  const SizedBox(height: 12),
+
+                  _section(
+                    context,
+                    title: '질문 의도',
+                    body: (d.intentText?.isNotEmpty == true)
+                        ? d.intentText!
+                        : '—',
+                  ),
+                  const SizedBox(height: 12),
+
+                  _section(
+                    context,
+                    title: '핵심 포인트',
+                    body:
+                        (d.pointText?.isNotEmpty == true) ? d.pointText! : '—',
+                  ),
+                  // L2에서는 모범답안/유사도/힌트는 노출하지 않음
+                ],
               ],
-              if (d.similarity != null) ...[
-                const SizedBox(height: 12),
-                _SimilarityGauge(value: d.similarity!),
-              ],
-            ],
-          ),
-        ),
+            ),
+          );
+        },
       ),
     );
   }
@@ -130,7 +178,25 @@ class StorageDetailScreen extends ConsumerWidget {
     );
   }
 
-  String _friendlyDateTime(DateTime dt) {
+  Widget _kvCard(BuildContext context, String k, String v) {
+    return Card(
+      elevation: 0,
+      color: Colors.white.withOpacity(0.03),
+      child: Padding(
+        padding: const EdgeInsets.all(14),
+        child: Row(
+          children: [
+            Text(k, style: const TextStyle(fontWeight: FontWeight.w600)),
+            const SizedBox(width: 12),
+            Expanded(child: Text(v)),
+          ],
+        ),
+      ),
+    );
+  }
+
+  String _friendlyDateTimeOrDash(DateTime? dt) {
+    if (dt == null) return '—';
     final y = dt.year.toString().padLeft(4, '0');
     final m = dt.month.toString().padLeft(2, '0');
     final d = dt.day.toString().padLeft(2, '0');
@@ -140,7 +206,7 @@ class StorageDetailScreen extends ConsumerWidget {
   }
 }
 
-// 유사도 시각화
+// 유사도 시각화 (LEVEL_1 전용)
 class _SimilarityGauge extends StatelessWidget {
   final double value; // 0.0 ~ 1.0
   const _SimilarityGauge({required this.value});
@@ -149,7 +215,6 @@ class _SimilarityGauge extends StatelessWidget {
   Widget build(BuildContext context) {
     final v = value.clamp(0.0, 1.0);
     final percent = (v * 100).round();
-
     return Card(
       elevation: 0,
       color: Colors.white.withOpacity(0.04),
@@ -162,10 +227,7 @@ class _SimilarityGauge extends StatelessWidget {
             const SizedBox(height: 8),
             ClipRRect(
               borderRadius: BorderRadius.circular(6),
-              child: LinearProgressIndicator(
-                value: v,
-                minHeight: 10,
-              ),
+              child: LinearProgressIndicator(value: v, minHeight: 10),
             ),
             const SizedBox(height: 6),
             Text('$percent%', style: Theme.of(context).textTheme.bodySmall),

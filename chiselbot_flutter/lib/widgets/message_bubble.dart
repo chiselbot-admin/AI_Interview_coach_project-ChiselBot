@@ -44,6 +44,7 @@ class MessageBubble extends StatelessWidget {
     Widget child;
     if (animatedSegments != null) {
       child = AnimatedTextKit(
+        key: ValueKey(animatedSegments!.join('|')), // 내용 바뀌면 애니 재시작
         animatedTexts: animatedSegments!
             .map((s) => TypewriterAnimatedText(
                   s,

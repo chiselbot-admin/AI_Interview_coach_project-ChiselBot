@@ -5,6 +5,8 @@ import 'package:flutter_spinkit/flutter_spinkit.dart';
 import '../models/cards.dart';
 import '../providers/app_providers.dart';
 import '../widgets/card_view.dart';
+import 'level_picker_dialog.dart';
+import 'level_select_sheet.dart';
 import 'main_view_title.dart';
 import 'notice_view.dart';
 
@@ -21,15 +23,6 @@ class _MainViewState extends ConsumerState<MainView> {
 
   int _selectedIndex = -1; // 카드 선택 인덱스
 
-  // 백엔드 DB categoryId와 맞게 실제 매핑 수정
-  // Map<String, int> _nameToId = const {
-  //   'java': 1,
-  //   'python': 2,
-  //   'c': 3,
-  //   'html/css': 4,
-  //   'javascript': 5,
-  //   'mysql': 6,
-  // };
   // 서버에서 받아 채울 카테고리 이름→ID 매핑
   Map<String, int> _nameToId = {};
 
@@ -98,17 +91,23 @@ class _MainViewState extends ConsumerState<MainView> {
       return;
     }
 
+    // 1) 레벨 모달 먼저
+    final level = await pickInterviewLevel(context);
+    if (level == null) return; // 사용자가 닫음
+
     final qna = AppProviders.of(context).qna;
 
+    // 2) 로딩 다이얼로그 (선택 사항)
     showDialog(
       context: context,
       barrierDismissible: false,
       builder: (_) => const Center(child: CircularProgressIndicator()),
     );
 
-    await qna.loadQuestion(categoryId: categoryId, level: 'LEVEL_1');
+    // 3) 질문 로드
+    await qna.loadQuestion(categoryId: categoryId, level: level);
 
-    if (mounted) Navigator.pop(context);
+    if (mounted) Navigator.pop(context); // 로딩 닫기
 
     if (qna.error != null) {
       if (!mounted) return;

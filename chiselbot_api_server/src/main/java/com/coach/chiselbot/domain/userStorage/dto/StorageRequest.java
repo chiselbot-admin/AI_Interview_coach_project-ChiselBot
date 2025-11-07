@@ -15,8 +15,9 @@ public class StorageRequest {
         private Long userId;
         private Long questionId;
         private String userAnswer;
-        private double similarity;
         private String feedback;
         private String hint;
+        private Double similarity;
+        private String grade;
     }
 }

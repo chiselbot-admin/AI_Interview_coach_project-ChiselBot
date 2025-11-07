@@ -8,8 +8,11 @@ import '../../providers/qna_provider.dart' show QnaProvider, apiServiceProvider;
 import '../../providers/storage_providers.dart';
 import '../../services/storage_api.dart';
 import '../../widgets/message_bubble.dart';
+import 'TipPanel.dart';
 import 'hint_panel.dart';
+import 'model_with_diff.dart';
 import 'result_summary.dart';
+import 'level2_feedback_card.dart';
 
 class ChatScreen extends ConsumerStatefulWidget {
   const ChatScreen({super.key});
@@ -22,10 +25,9 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
   late QnaProvider qna;
 
   bool _submitted = false; // 코칭 1회 제한
-  bool _showModel = false; // 모범답안 노출 토글 상태
-
+  bool _showModel = false; // 모범답안 토글(로컬)
   bool _saving = false; // 저장 중
-  bool _saved = false; // 저장 완료 후
+  bool _saved = false; // 저장 완료
 
   @override
   void didChangeDependencies() {
@@ -39,6 +41,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
     super.dispose();
   }
 
+  // 문장 끝 기준으로 자연스럽게 타이핑 세그먼트 분리
   List<String> _splitForTyping(String text) {
     return text
         .split(RegExp(r'(?<=[.!?…\n])\s+'))
@@ -70,7 +73,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                       ),
                     )
                   : IconButton(
-                      key: ValueKey('saveBtn'),
+                      key: const ValueKey('saveBtn'),
                       iconSize: 28,
                       tooltip: _saved ? '저장 완료' : '보관하기',
                       icon: Icon(
@@ -88,14 +91,23 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                               final fb = qna.lastFeedback!;
                               setState(() => _saving = true);
                               try {
+                                final isL2 = q.interviewLevel == 'LEVEL_2';
                                 await api.saveStorage(
                                   questionId: q.questionId,
                                   userAnswer: fb.userAnswer,
-                                  similarity: fb.similarity,
+                                  // LEVEL_1: 기존처럼 similarity/questionAnswer 보냄
+                                  similarity:
+                                      isL2 ? null : (fb.similarity ?? 0.0),
                                   feedback: fb.feedback ?? '',
                                   hint: fb.hint ?? '',
-                                  questionAnswer:
-                                      fb.questionAnswer ?? q.answerText,
+                                  questionAnswer: isL2
+                                      ? null
+                                      : (fb.questionAnswer ?? q.answerText),
+                                  // LEVEL_2: 새 필드 전송
+                                  level: q.interviewLevel,
+                                  grade: isL2 ? fb.grade : null,
+                                  intentText: isL2 ? fb.intentText : null,
+                                  pointText: isL2 ? fb.pointText : null,
                                 );
                                 if (!mounted) return;
                                 setState(() {
@@ -124,13 +136,43 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
           ),
         ],
       ),
+
+      // qna 변경을 즉시 반영
       body: AnimatedBuilder(
         animation: qna,
         builder: (context, _) {
-          if (qna.currentQuestion == null) {
-            return const Center(child: Text('질문이 없습니다. 메인에서 시작하세요.'));
+          // 1) 로딩이거나 아직 질문이 없을 때: 스켈레톤만 (이전 말풍선은 렌더하지 않음)
+          if (qna.loading || qna.currentQuestion == null) {
+            return Padding(
+              padding: const EdgeInsets.all(12),
+              child: Column(
+                children: [
+                  Expanded(
+                    child: ListView(
+                      children: [
+                        const _ShimmerCard(),
+                        const SizedBox(height: 8),
+                        // RotatingTips는 const 생성자가 아닐 수 있으므로 const 금지
+                        RotatingTips(
+                          messages: const [
+                            '의도 분석 중...',
+                            '핵심 키워드 추출 중...',
+                            '구조 점검 중...',
+                            '점수 계산 중...',
+                          ],
+                          // intervalMs: 2400, // 필요 시 사용
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            );
           }
+
+          // 2) 정상 질문 렌더
           final q = qna.currentQuestion!;
+          final isL2 = q.interviewLevel == 'LEVEL_2';
           final segments =
               _splitForTyping("[${q.categoryName}] ${q.questionText}");
 
@@ -141,8 +183,9 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                 Expanded(
                   child: ListView(
                     children: [
-                      // 질문 말풍선(타이핑)
+                      // 질문 말풍선(타자 효과) — key로 강제 재시작 (랜덤 문제/다음 문제 시 초기화 보장)
                       MessageBubble(
+                        key: ValueKey('q-${q.questionId}-${qna.typingDone}'),
                         isUser: false,
                         animatedSegments: qna.typingDone ? null : segments,
                         text: qna.typingDone
@@ -167,6 +210,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                       // 액션 버튼들
                       Row(
                         children: [
+                          // 코칭 받기
                           Expanded(
                             child: FilledButton(
                               onPressed: (!qna.typingDone ||
@@ -202,16 +246,56 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                             ),
                           ),
                           const SizedBox(width: 8),
+
+                          // 힌트/팁 버튼 (상태 스위칭)
                           Expanded(
                             child: OutlinedButton(
-                              // 힌트가 이미 노출되었으면 비활성화
-                              onPressed: (!qna.loading && !qna.hintVisible)
-                                  ? qna.revealHint
-                                  : null,
-                              child: const Text('힌트 보기'),
+                              // 레벨2 + 코칭 전이면 onPressed = null 로 비활성화
+                              onPressed: qna.loading
+                                  ? null
+                                  : (() {
+                                      final submitted = _submitted ||
+                                          (qna.lastFeedback != null);
+                                      // L2 & 코칭 전 -> 비활성
+                                      if (isL2 && !submitted) return null;
+
+                                      // 나머지 경우에는 실제 동작 콜백 반환
+                                      return () {
+                                        if (qna.loading) return;
+
+                                        final submittedNow = _submitted ||
+                                            (qna.lastFeedback != null);
+                                        if (submittedNow) {
+                                          // 코칭 후: TIP 토글 (L1/L2 공통)
+                                          if (qna.hintVisible)
+                                            qna.hideHint(); // 충돌 방지
+                                          qna.toggleTipVisible();
+                                          return;
+                                        }
+
+                                        // 코칭 전 + L1: 키워드 힌트 점진 공개
+                                        if (!isL2) {
+                                          if (!qna.hintVisible) {
+                                            qna.revealHint();
+                                          } else {
+                                            qna.revealExtraHint();
+                                          }
+                                        }
+                                      };
+                                    }()),
+                              child: Text(
+                                (qna.lastFeedback != null)
+                                    ? (qna.tipVisible
+                                        ? 'TIP 숨기기'
+                                        : 'TIP 보기') // 코칭 후
+                                    : (isL2
+                                        ? 'TIP'
+                                        : '힌트 보기'), // 코칭 전: L2는 'TIP' 이지만 비활성
+                              ),
                             ),
                           ),
                           const SizedBox(width: 8),
+
                           // 다음 문제
                           Expanded(
                             child: OutlinedButton.icon(
@@ -222,6 +306,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                                   : () async {
                                       final cur = qna.currentQuestion;
                                       if (cur == null) return;
+
                                       await qna.loadQuestion(
                                         categoryId: cur.categoryId,
                                         level: cur.interviewLevel,
@@ -230,21 +315,27 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                                       setState(() {
                                         _submitted = false;
                                         _showModel = false; // 다음 문제 시 숨김
+                                        _saved = false; // 새 문제에서 다시 저장 가능
                                       });
+
+                                      // 힌트/팁 상태 초기화 (중복 방지)
+                                      qna.hideHint();
+                                      qna.hideTip();
 
                                       if (qna.error != null && mounted) {
                                         ScaffoldMessenger.of(context)
                                             .showSnackBar(
                                           SnackBar(
-                                              content: Text(
-                                                  '다음 문제 불러오기 실패: ${qna.error}')),
+                                            content: Text(
+                                                '다음 문제 불러오기 실패: ${qna.error}'),
+                                          ),
                                         );
                                       } else if (mounted) {
                                         ScaffoldMessenger.of(context)
                                             .showSnackBar(
                                           const SnackBar(
-                                              content:
-                                                  Text('같은 문제가 나올 수 있습니다.')),
+                                            content: Text('같은 문제가 나올 수 있습니다.'),
+                                          ),
                                         );
                                       }
                                     },
@@ -254,64 +345,65 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                       ),
                       const SizedBox(height: 12),
 
-                      // 로딩 (느리게)
+                      // 로딩 중 표시(느리게)
                       if (qna.loading) ...[
                         const _ShimmerCard(),
                         const SizedBox(height: 8),
-                        const RotatingTips(
-                          messages: [
+                        RotatingTips(
+                          messages: const [
                             '의도 분석 중...',
                             '핵심 키워드 추출 중...',
                             '구조 점검 중...',
                             '점수 계산 중...',
                           ],
-                          intervalMs: 2400,
                         ),
                       ],
 
                       // 결과
                       if (qna.lastFeedback != null && !qna.loading) ...[
-                        // 요약(판정 결과 메시지 버블이 아닌, 요약 카드 유지)
-                        ResultSummary(fb: qna.lastFeedback!),
-                        const SizedBox(height: 8),
-
-                        // ⬇️ 모범답안 보기/숨기기 토글 버튼 (답안이 있을 때만 활성)
-                        Align(
-                          alignment: Alignment.centerRight,
-                          child: TextButton.icon(
-                            onPressed:
-                                (qna.lastFeedback?.questionAnswer != null)
-                                    ? () => setState(() {
-                                          _showModel = !_showModel;
-                                        })
-                                    : null,
-                            icon: Icon(
-                              _showModel
+                        if (!isL2) ...[
+                          // LEVEL_1: 요약 + 모범답안 토글
+                          ResultSummary(fb: qna.lastFeedback!),
+                          const SizedBox(height: 8),
+                          Align(
+                            alignment: Alignment.centerRight,
+                            child: TextButton.icon(
+                              onPressed:
+                                  (qna.lastFeedback?.questionAnswer != null)
+                                      ? qna.toggleModelVisible
+                                      : null,
+                              icon: Icon(qna.modelVisible
                                   ? Icons.visibility_off
-                                  : Icons.visibility,
-                            ),
-                            label: Text(
-                              _showModel ? '모범답안 숨기기' : '모범답안 보기',
+                                  : Icons.visibility),
+                              label: Text(
+                                  qna.modelVisible ? '모범답안 숨기기' : '모범답안 보기'),
                             ),
                           ),
-                        ),
-                        const SizedBox(height: 8),
-
-                        // ⬇️ 모범답안은 토글 상태일 때만 노출
-                        if (_showModel &&
-                            qna.lastFeedback?.questionAnswer != null)
-                          _ModelAnswerBlock(
-                            modelText: qna.lastFeedback!.questionAnswer!,
-                          ),
-
+                          const SizedBox(height: 8),
+                          if (qna.modelVisible &&
+                              qna.lastFeedback?.questionAnswer != null)
+                            ModelWithDiff(
+                              model: qna.lastFeedback!.questionAnswer!,
+                              user: qna.lastFeedback!.userAnswer,
+                            ),
+                        ] else ...[
+                          // LEVEL_2: 등급/의도/포인트 카드
+                          Level2FeedbackCard(fb: qna.lastFeedback!),
+                        ],
                         const SizedBox(height: 12),
                       ],
 
-                      // 힌트(키워드 공개)
-                      if (qna.hintVisible)
+                      // 코칭 후: TIP(문단) — L1/L2 공통
+                      if (!qna.loading &&
+                          qna.lastFeedback != null &&
+                          qna.tipVisible)
+                        TipPanel(tip: qna.lastFeedback!.hint ?? ''),
+
+                      // 코칭 전: (레벨1만) 키워드 힌트 점진 공개
+                      if (qna.hintVisible && !isL2)
                         HintPanel(
-                          fb: qna.lastFeedback,
-                          question: qna.currentQuestion,
+                          fb: qna.lastFeedback, // 코칭 전에는 거의 null
+                          question: qna.currentQuestion, // 모범답안/질문에서 키워드 추출
                           extraStep: qna.extraHintIndex,
                           onMore: qna.revealExtraHint,
                         ),
@@ -408,40 +500,6 @@ class _ShimmerLineState extends State<_ShimmerLine>
           ),
         );
       },
-    );
-  }
-}
-
-// 모범답안 전용 블록(가독성 위주)
-class _ModelAnswerBlock extends StatelessWidget {
-  final String modelText;
-  const _ModelAnswerBlock({required this.modelText});
-
-  @override
-  Widget build(BuildContext context) {
-    return Card(
-      elevation: 0,
-      color: Colors.white.withOpacity(0.04),
-      child: Padding(
-        padding: const EdgeInsets.all(12),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: const [
-                Icon(Icons.visibility, size: 16),
-                SizedBox(width: 6),
-                Text('모범답안', style: TextStyle(fontWeight: FontWeight.w600)),
-              ],
-            ),
-            const SizedBox(height: 8),
-            SelectableText(
-              modelText,
-              textAlign: TextAlign.start,
-            ),
-          ],
-        ),
-      ),
     );
   }
 }
