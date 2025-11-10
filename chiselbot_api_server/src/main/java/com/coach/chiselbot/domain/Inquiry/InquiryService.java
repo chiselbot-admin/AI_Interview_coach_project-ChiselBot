@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.stream.IntStream;
 
 @Service
 @RequiredArgsConstructor
@@ -38,12 +39,19 @@ public class InquiryService {
      * 관리자 리스트 조회 처리
      */
     public List<InquiryResponseDTO.AdminInquiryList> adminInquiryList() {
-        return inquiryRepository.findAllWithUserAnswer()
-                .stream()
-                .map(InquiryResponseDTO.AdminInquiryList::from)
+        List<Inquiry> inquiries = inquiryRepository.findAllWithUserAnswer();
+
+        return IntStream.range(0, inquiries.size())
+                .mapToObj(i -> {
+                    Inquiry inquiry = inquiries.get(i);
+                    InquiryResponseDTO.AdminInquiryList dto =
+                            InquiryResponseDTO.AdminInquiryList.from(inquiry);
+                    dto.setDisplayNumber(i + 1);
+
+                    return dto;
+                })
                 .toList();
     }
-
 
     /**
      * 사용자 문의 삭제 처리
@@ -94,8 +102,15 @@ public class InquiryService {
     /**
      * 사용자 문의 상세 조회 처리
      */
+//    public InquiryResponseDTO.UserInquiryDetail finById(Long id) {
+//        Inquiry inquiry = inquiryRepository.findById(id)
+//                .orElseThrow(() -> new Exception404("해당 문의를 찾을 수 없습니다."));
+//        return InquiryResponseDTO.UserInquiryDetail.from(inquiry);
+//    }
+
+    // 미답변된 문의도 상세 볼 수 있도록
     public InquiryResponseDTO.UserInquiryDetail finById(Long id) {
-        Inquiry inquiry = inquiryRepository.findById(id)
+        Inquiry inquiry = inquiryRepository.findByIdWithAnswer(id)
                 .orElseThrow(() -> new Exception404("해당 문의를 찾을 수 없습니다."));
         return InquiryResponseDTO.UserInquiryDetail.from(inquiry);
     }

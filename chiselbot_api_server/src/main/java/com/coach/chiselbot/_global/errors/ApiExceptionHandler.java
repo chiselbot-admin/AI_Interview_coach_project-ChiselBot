@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import java.net.URI;
 
-@Order(0)
+@Order(2)
 @RestControllerAdvice(annotations = RestController.class)
 public class ApiExceptionHandler {
 

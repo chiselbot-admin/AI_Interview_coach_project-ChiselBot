@@ -18,6 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.ThreadLocalRandom;
 
 @Service
 @RequiredArgsConstructor
@@ -61,12 +62,18 @@ public class InterviewQuestionService {
         InterviewCategory category = interviewCategoryRepository.findById(categoryId)
                 .orElseThrow(() -> new AdminException404("해당 카테고리를 찾을 수 없습니다"));
 
-        Optional<InterviewQuestion> questionOpt =
-                interviewQuestionRepository.findFirstByCategoryId_CategoryIdAndInterviewLevel(
-                        category.getCategoryId(),
-                        level
-                );
-        return questionOpt.map(QuestionResponse.FindById::fromEntity).orElse(null);
+        long total = interviewQuestionRepository
+                .countByCategoryId_CategoryIdAndInterviewLevel(categoryId, level);
+
+        if (total == 0) return null;
+
+        int idx = ThreadLocalRandom.current().nextInt((int) total);
+        Page<InterviewQuestion> page = interviewQuestionRepository
+                .findByCategoryId_CategoryIdAndInterviewLevel(
+                        categoryId, level, PageRequest.of(idx, 1));
+
+        InterviewQuestion q = page.getContent().isEmpty() ? null : page.getContent().get(0);
+        return (q == null) ? null : QuestionResponse.FindById.fromEntity(q);
     }
 
     // Admin - 질문등록 기능

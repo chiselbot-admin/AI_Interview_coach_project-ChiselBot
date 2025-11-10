@@ -14,7 +14,7 @@ if (localPropertiesFile.exists()) {
 
 // .env 파일 읽기 추가
 def envProperties = new Properties()
-def envFile = rootProject.file('../../.env')  // Flutter 루트의 .env
+def envFile = rootProject.file('../.env')  // Flutter 루트의 .env
 if (envFile.exists()) {
     envFile.withReader('UTF-8') { reader ->
         envProperties.load(reader)
@@ -50,6 +50,10 @@ android {
         def kakaoKey = envProperties.getProperty('KAKAO_NATIVE_APP_KEY')
                 ?: localProperties.getProperty('KAKAO_NATIVE_APP_KEY')
                 ?: ''
+
+        println("key value check env : " + envProperties.getProperty('KAKAO_NATIVE_APP_KEY'))
+        println("key value check local : " + localProperties.getProperty('KAKAO_NATIVE_APP_KEY'))
+        println("kakaoKey check : " + kakaoKey)
 
         manifestPlaceholders = [KAKAO_NATIVE_APP_KEY: kakaoKey]
 

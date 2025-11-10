@@ -136,18 +136,4 @@ class ApiService {
       throw Exception(m is Map ? (m['error'] ?? '문의 등록 실패') : '문의 등록 실패');
     }
   }
-
-  // 관리자 답변 등록 (임시)
-  // Future<void> answerInquiry(
-  //     {required int inquiryId, required String answer}) async {
-  //   final res = await http.post(
-  //     Uri.parse('$baseUrl/api/inquiries/$inquiryId/answer'),
-  //     headers: _headers(),
-  //     body: jsonEncode({'answerContent': answer}),
-  //   );
-  //   if (res.statusCode != 200) {
-  //     final m = jsonDecode(res.body);
-  //     throw Exception(m is Map ? (m['error'] ?? '답변 등록 실패') : '답변 등록 실패');
-  //   }
-  // }
 }

@@ -1,4 +1,3 @@
-// 공통 래퍼(백엔드 CommonResponseDto.success에 맞춤)
 class ApiEnvelope<T> {
   final bool success;
   final T? data;
@@ -31,7 +30,7 @@ class InterviewCategory {
 class InterviewQuestion {
   final int questionId;
   final String questionText;
-  final String interviewLevel; // "LEVEL_1", "LEVEL_2" ...
+  final String interviewLevel;
   final String categoryName;
   final String? answerText; // LEVEL_1에서만 채움(백엔드에서 내려줄 때)
   final int categoryId;
@@ -59,11 +58,15 @@ class InterviewQuestion {
 // 코칭 응답(FeedbackResponse.FeedbackResult에 맞춤)
 class CoachFeedback {
   final int questionId;
-  final double similarity;
+  final double? similarity;
   final String feedback;
   final String? hint; // 유사도 < 0.8일 때만
   final String userAnswer;
-  final String? questionAnswer; // LEVEL_1일 때 백엔드가 채움
+  final String? questionAnswer; // LEVEL_1에서 기대
+  // LEVEL_2
+  final String? intentText; // 질문 의도
+  final String? pointText; // 핵심 포인트
+  final String? grade; // 상,중,하
 
   CoachFeedback({
     required this.questionId,
@@ -72,6 +75,9 @@ class CoachFeedback {
     required this.userAnswer,
     this.hint,
     this.questionAnswer,
+    this.intentText,
+    this.pointText,
+    this.grade,
   });
 
   factory CoachFeedback.fromJson(Map<String, dynamic> j) => CoachFeedback(
@@ -81,5 +87,8 @@ class CoachFeedback {
         hint: j['hint'],
         userAnswer: j['userAnswer'],
         questionAnswer: j['questionAnswer'],
+        intentText: j['intentText'],
+        pointText: j['pointText'],
+        grade: j['grade'],
       );
 }

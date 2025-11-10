@@ -11,12 +11,13 @@ import java.util.Optional;
 
 public interface InquiryRepository extends JpaRepository<Inquiry, Long> {
 
+    // 문의 상세 조회
     @Query("SELECT i FROM Inquiry i LEFT JOIN FETCH i.answer WHERE i.id = :id")
     Optional<Inquiry> findByIdWithAnswer(@Param("id") Long id);
 
+    // 문의 전체 조회
     @Query("SELECT i FROM Inquiry i JOIN FETCH i.user u LEFT JOIN FETCH i.answer a LEFT JOIN FETCH a.admin ad ORDER BY i.createdAt DESC")
     List<Inquiry> findAllWithUserAnswer();
-
 
     // 오늘 등록된 문의 수
     @Query("SELECT COUNT(i) FROM Inquiry i WHERE i.createdAt >= :startOfDay")

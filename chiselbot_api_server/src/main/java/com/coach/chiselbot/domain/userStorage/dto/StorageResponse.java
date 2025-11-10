@@ -25,6 +25,7 @@ public class StorageResponse {
         private final String categoryName;
         private final String createdAt;
         private final String questionAnswer;
+        private final String grade;
 
         public FindById(UserStorage storage) {
             this.storageId = storage.getStorageId();
@@ -40,6 +41,7 @@ public class StorageResponse {
             this.categoryName = storage.getQuestion().getCategoryId().getName();
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
             this.createdAt = storage.getCreatedAt() != null ? storage.getCreatedAt().format(formatter) : null;
+            this.grade = storage.getGrade();
         }
 
         private String nvl(String value) {

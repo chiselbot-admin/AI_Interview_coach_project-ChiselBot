@@ -20,17 +20,18 @@
                         <thead>
                         <tr>
                             <th style="width: 6%;">번호</th>
-                            <th style="width: 28%;">제목</th>
-                            <th style="width: 20%;">작성자 이메일</th>
-                            <th style="width: 15%;">상태</th>
-                            <th style="width: 16%;">등록일</th>
-                            <th style="width: 15%;">관리</th>
+                            <th style="width: 25%;">제목</th>
+                            <th style="width: 18%;">작성자 이메일</th>
+                            <th style="width: 12%;">상태</th>
+                            <th style="width: 14%;">문의 등록일</th>
+                            <th style="width: 14%;">답변 등록일</th>
+                            <th style="width: 11%;">관리</th>
                         </tr>
                         </thead>
                         <tbody>
                         {{#inquiries}}
                             <tr>
-                                <td>{{inquiryId}}</td>
+                                <td>{{displayNumber}}</td>
                                 <td>{{title}}</td>
                                 <td>{{userName}}</td>
                                 <td>
@@ -38,9 +39,12 @@
                                     {{#isAnswered}}<span class="badge bg-success">{{status.label}}</span>{{/isAnswered}}
                                     {{#isClosed}}<span class="badge bg-secondary">{{status.label}}</span>{{/isClosed}}
                                 </td>
+                                <td>{{createdAt}}</td>
                                 <td>
-                                    {{createdAt}}
-                                    {{#isUpdated}}<small class="text-muted">(수정됨)</small>{{/isUpdated}}
+                                    {{#answerCreatedAt}}
+                                        {{answerCreatedAt}}<br>
+                                    {{/answerCreatedAt}}
+                                    {{^answerCreatedAt}}-{{/answerCreatedAt}}
                                 </td>
                                 <td>
                                     <a href="/admin/inquiries/{{inquiryId}}" class="btn btn-sm btn-primary">
