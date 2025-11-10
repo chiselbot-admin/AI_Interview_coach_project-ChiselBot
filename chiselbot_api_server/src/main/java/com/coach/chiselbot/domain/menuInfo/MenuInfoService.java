@@ -72,21 +72,30 @@ public class MenuInfoService {
         MenuInfo updateMenuInfo = menuInfoRepository.findById(menuId)
                 .orElseThrow(() -> new AdminException404("해당 메뉴를 찾을 수 없습니다"));
 
+        Integer oldOrder = updateMenuInfo.getMenuOrder();
         Integer newOrder = request.getMenuOrder();
 
         // 현재 order와 다르고, 새로운 order가 이미 존재한다면 이후 순서 전부 +1
-        if (!updateMenuInfo.getMenuOrder().equals(newOrder)
-                && menuInfoRepository.existsByMenuOrder(newOrder)) {
-            List<MenuInfo> conflictMenus = menuInfoRepository.findByMenuOrderGreaterThanEqual(newOrder);
-            for (MenuInfo menu : conflictMenus) {
-                menu.setMenuOrder(menu.getMenuOrder() + 1);
+        if (!oldOrder.equals(newOrder)) {
+            if (newOrder > oldOrder) {
+                // 아래로 이동하는 경우 → 사이 구간의 메뉴들을 -1
+                List<MenuInfo> betweenMenus = menuInfoRepository.findByMenuOrderBetween(oldOrder + 1, newOrder);
+                for (MenuInfo menu : betweenMenus) {
+                    menu.setMenuOrder(menu.getMenuOrder() - 1);
+                }
+            } else {
+                // 위로 이동하는 경우 → 사이 구간의 메뉴들을 +1
+                List<MenuInfo> betweenMenus = menuInfoRepository.findByMenuOrderBetween(newOrder, oldOrder - 1);
+                for (MenuInfo menu : betweenMenus) {
+                    menu.setMenuOrder(menu.getMenuOrder() + 1);
+                }
             }
         }
 
+        updateMenuInfo.setMenuOrder(newOrder);
         updateMenuInfo.setMenuName(request.getMenuName());
         updateMenuInfo.setMenuCode(request.getMenuCode());
         updateMenuInfo.setParent(request.getParent());
-        updateMenuInfo.setMenuOrder(newOrder);
         updateMenuInfo.setUrlPath(request.getUrlPath());
         updateMenuInfo.setVisible(request.getVisible());
         updateMenuInfo.setDescription(request.getDescription());
