@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
+import '../core/app_router.dart';
 import '../providers/auth_notifier.dart';
 import '../widgets/theme_select_dialog.dart';
 
@@ -22,7 +23,7 @@ class SettingsScreen extends ConsumerWidget {
             title: const Text('프로필 수정'),
             trailing: const Icon(Icons.arrow_forward_ios, size: 16),
             onTap: () {
-              Navigator.of(context).pushNamed('/profileEdit');
+              Navigator.of(context).pushNamed(RoutePaths.profileEdit);
             },
           ),
           Divider(color: Colors.grey.shade800, indent: 16, endIndent: 16),
@@ -47,7 +48,7 @@ class SettingsScreen extends ConsumerWidget {
             title: const Text('공지사항'),
             trailing: const Icon(Icons.arrow_forward_ios, size: 16),
             onTap: () {
-              Navigator.of(context).pushNamed('/notice');
+              Navigator.of(context).pushNamed(RoutePaths.notice);
             },
           ),
           Divider(color: Colors.grey.shade800, indent: 16, endIndent: 16),
@@ -57,7 +58,7 @@ class SettingsScreen extends ConsumerWidget {
             title: const Text('문의하기(Q&A)'),
             trailing: const Icon(Icons.arrow_forward_ios, size: 16),
             onTap: () {
-              Navigator.of(context).pushNamed('/qna');
+              Navigator.of(context).pushNamed(RoutePaths.qna);
             },
           ),
           Divider(color: Colors.grey.shade800, indent: 16, endIndent: 16),
@@ -73,8 +74,8 @@ class SettingsScreen extends ConsumerWidget {
             onTap: () async {
               await ref.read(authNotifierProvider.notifier).logout();
               if (context.mounted) {
-                Navigator.of(context)
-                    .pushNamedAndRemoveUntil('/login', (route) => false);
+                Navigator.of(context).pushNamedAndRemoveUntil(
+                    RoutePaths.login, (route) => false);
               }
             },
           ),
