@@ -5,10 +5,12 @@ import 'package:flutter_spinkit/flutter_spinkit.dart';
 import '../models/cards.dart';
 import '../providers/app_providers.dart';
 import '../widgets/card_view.dart';
+import '../widgets/error_panel.dart';
 import 'level_picker_dialog.dart';
 import 'level_select_sheet.dart';
 import 'main_view_title.dart';
 import 'notice_view.dart';
+import '../widgets/error_sheet.dart';
 
 class MainView extends ConsumerStatefulWidget {
   const MainView({super.key});
@@ -22,6 +24,7 @@ class _MainViewState extends ConsumerState<MainView> {
   final double _cardRatio = .17;
 
   int _selectedIndex = -1; // 카드 선택 인덱스
+  String? _error; // 에러 메세지 보관
 
   // 서버에서 받아 채울 카테고리 이름→ID 매핑
   Map<String, int> _nameToId = {};
@@ -45,29 +48,21 @@ class _MainViewState extends ConsumerState<MainView> {
   }
 
   Future<void> _loadData() async {
-    print('[MainView] _loadData start');
+    setState(() {
+      _isLoading = true;
+      _error = null; // 기존 에러 리셋
+    });
+
     try {
       final api = AppProviders.of(context).api;
       final cats = await api.fetchCategories();
-      print(
-          '[MainView] categories fetched: ${cats.map((e) => '${e.categoryId}:${e.name}').toList()}');
-
       final map = <String, int>{};
       for (final c in cats) {
         map[_norm(c.name)] = c.categoryId;
       }
-
       if (mounted) setState(() => _nameToId = map);
     } catch (e) {
-      print('[MainView] fetchCategories error: $e');
-      if (mounted) {
-        // ScaffoldMessenger 직접 호출 X
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('카테고리 목록을 불러오지 못했어요.')),
-          );
-        });
-      }
+      if (mounted) setState(() => _error = '카테고리 목록을 불러오지 못했어요.\n$e');
     } finally {
       await Future.delayed(const Duration(milliseconds: 300));
       if (mounted) setState(() => _isLoading = false);
@@ -85,9 +80,8 @@ class _MainViewState extends ConsumerState<MainView> {
   Future<void> _startByTitle(String title) async {
     final categoryId = _resolveCategoryIdByTitle(title);
     if (categoryId == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('카테고리 매핑 실패: $title')),
-      );
+      // SnackBar -> 매핑 실패 다이얼로그
+      _showMappingFailSheet(title);
       return;
     }
 
@@ -111,8 +105,7 @@ class _MainViewState extends ConsumerState<MainView> {
 
     if (qna.error != null) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text('질문 불러오기 실패: ${qna.error}')));
+      _showQnaErrorSheet(title: title, error: qna.error!);
       return;
     }
 
@@ -150,6 +143,21 @@ class _MainViewState extends ConsumerState<MainView> {
               child: SpinKitCircle(
                 color: Colors.grey,
                 duration: Duration(milliseconds: 300),
+              ),
+            ),
+          )
+        else if (_error != null) //에러 상태 UI 분기
+          SizedBox(
+            height: mediaQuery.size.height * _cardRatio * 3,
+            child: Center(
+              child: Padding(
+                padding: EdgeInsets.symmetric(
+                    horizontal: mediaQuery.size.width * .1),
+                child: ErrorPanel(
+                  message: _error!,
+                  onRetry: _loadData,
+                  onDetails: () => _showErrorDetails(_error!),
+                ),
               ),
             ),
           )
@@ -199,6 +207,136 @@ class _MainViewState extends ConsumerState<MainView> {
           ),
         ),
       ],
+    );
+  }
+
+  // ---------- [MODIFIED] 공통: 화면 중앙 다이얼로그 헬퍼 ----------
+  void _showCenteredDialog(Widget child) {
+    showGeneralDialog(
+      context: context,
+      barrierDismissible: true, // 바깥/백버튼으로 닫힘 (기본 의도)
+      barrierLabel: 'Dismiss',
+      barrierColor: Colors.black54, // 반투명 배리어
+      transitionDuration: const Duration(milliseconds: 200),
+      pageBuilder: (_, __, ___) {
+        // [MODIFIED] 바깥 탭 닫힘을 확실히 하기 위해 전체 화면 GestureDetector 추가
+        return GestureDetector(
+          behavior: HitTestBehavior.opaque,
+          onTap: () => Navigator.of(context).pop(), // 바깥을 탭하면 닫기
+          child: Center(
+            // [MODIFIED] 다이얼로그 영역은 탭이 닫힘으로 전달되지 않도록 막아줌
+            child: GestureDetector(
+              onTap: () {}, // 다이얼로그 안쪽 탭 이벤트 소비(전파 방지)
+              child: Material(
+                color: Colors.transparent,
+                child: Dialog(
+                  backgroundColor: Colors.grey.shade900,
+                  insetPadding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 24,
+                  ),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(maxWidth: 520),
+                    child: child, // 원하는 위젯을 내용으로 주입
+                  ),
+                ),
+              ),
+            ),
+          ),
+        );
+      },
+      // 부드러운 scale + fade
+      transitionBuilder: (_, anim, __, dialogChild) => Opacity(
+        opacity: anim.value,
+        child: Transform.scale(
+          scale: 0.96 + 0.04 * anim.value,
+          child: dialogChild,
+        ),
+      ),
+    );
+  }
+
+// ---------- 에러 상세 다이얼로그 (개발자용) ----------
+  void _showErrorDetails(String message) {
+    // [MODIFIED] BottomSheet -> Center Dialog
+    _showCenteredDialog(
+      Padding(
+        padding: const EdgeInsets.all(16),
+        child: SelectableText(
+          message,
+          style: const TextStyle(color: Colors.white70),
+        ),
+      ),
+    );
+  }
+
+// ---------- 카테고리 매핑 실패: 가운데 다이얼로그 ----------
+  void _showMappingFailSheet(String title) {
+    // [MODIFIED] BottomSheet -> Center Dialog
+    _showCenteredDialog(
+      ErrorSheet(
+        title: '카테고리 매핑에 실패했어요',
+        mascotAsset: 'assets/images/chiselBot.png',
+        onPrimary: () {
+          Navigator.pop(context);
+          _loadData(); // 새로고침
+        },
+        primaryLabel: '카테고리 새로고침',
+        onSecondary: () {
+          Navigator.pop(context);
+          _showAvailableCategories();
+        },
+      ),
+    );
+  }
+
+// ---------- 카테고리 후보 리스트: 가운데 다이얼로그 ----------
+  void _showAvailableCategories() {
+    final items = _nameToId.entries.toList()
+      ..sort((a, b) => a.key.compareTo(b.key));
+    // [MODIFIED] BottomSheet -> Center Dialog
+    _showCenteredDialog(
+      SizedBox(
+        height: 420, // 스크롤 높이 제한
+        child: ListView.separated(
+          padding: const EdgeInsets.all(16),
+          itemBuilder: (_, i) => ListTile(
+            title:
+                Text(items[i].key, style: const TextStyle(color: Colors.white)),
+            subtitle: Text('ID: ${items[i].value}',
+                style: const TextStyle(color: Colors.white70)),
+            onTap: () => Navigator.pop(context),
+          ),
+          separatorBuilder: (_, __) => const Divider(height: 1),
+          itemCount: items.length,
+        ),
+      ),
+    );
+  }
+
+// ---------- QnA 실패: 가운데 다이얼로그 ----------
+  void _showQnaErrorSheet({required String title, required String error}) {
+    // [MODIFIED] BottomSheet -> Center Dialog
+    _showCenteredDialog(
+      ErrorSheet(
+        title: '질문을 불러오지 못했어요',
+        // caption: null,
+        mascotAsset: 'assets/images/chiselBot.png',
+        // tip: '네트워크/로그인 상태를 확인한 뒤 다시 시도해 보세요.',
+        onPrimary: () {
+          Navigator.pop(context);
+          _startByTitle(title); // 다시 시도
+        },
+        primaryLabel: '다시 시도',
+        onSecondary: () {
+          Navigator.pop(context);
+          _loadData(); // 카테고리 새로고침
+        },
+        secondaryLabel: '카테고리 새로고침',
+      ),
     );
   }
 }

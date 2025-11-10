@@ -4,6 +4,7 @@ import com.coach.chiselbot._global.common.Define;
 import com.coach.chiselbot.domain.admin.Admin;
 import com.coach.chiselbot.domain.interview_question.dto.QuestionRequest;
 import com.coach.chiselbot.domain.interview_question.dto.QuestionResponse;
+import com.coach.chiselbot.domain.notice.dto.NoticeRequest;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -13,6 +14,8 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 @Controller
 @RequiredArgsConstructor
@@ -30,6 +33,12 @@ public class InterviewQuestionController {
         Page<QuestionResponse.FindAll> questionPage = interviewQuestionService.getQuestionList(page);
         List<QuestionResponse.FindAll> questionList = questionPage.getContent();
 
+        int totalPages = questionPage.getTotalPages();
+        int currentPage = questionPage.getNumber(); // 0-based
+        List<QuestionRequest.PageInfo> pageInfos = IntStream.range(0, totalPages)
+                .mapToObj(i -> new QuestionRequest.PageInfo(i + 1, i, i == currentPage))
+                .toList();
+
         // Mustache 에서 사용 할 값 넘겨주는 Model
         model.addAttribute("questions", questionList); // 등록되어있는 질문 리스트
         model.addAttribute("currentPage", questionPage.getNumber()); // 현재 페이지
@@ -38,6 +47,7 @@ public class InterviewQuestionController {
         model.addAttribute("hasPrevious", questionPage.hasPrevious()); // 이전페이지 존재 여부
         model.addAttribute("nextPage", questionPage.hasNext() ? questionPage.getNumber() + 1 : questionPage.getNumber()); // 다음페이지 번호
         model.addAttribute("prevPage", questionPage.hasPrevious() ? questionPage.getNumber() - 1 : questionPage.getNumber()); // 이전페이지 번호
+        model.addAttribute("pageInfos", pageInfos); // 페이지 전체정보
         model.addAttribute("totalElements", questionPage.getTotalElements()); // 전체 질문 수
         model.addAttribute("pageSize", questionPage.getSize()); // 한페이지당 표시 개수 : 10
 

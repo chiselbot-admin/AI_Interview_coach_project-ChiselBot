@@ -13,7 +13,8 @@ class UserAvatar extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final (userName, _, profileImageUrl) = ref.watch(currentUserInfoProvider);
+    final (userName, _, profileImageUrl, _) =
+        ref.watch(currentUserInfoProvider);
     final bool hasProfileImage =
         profileImageUrl != null && profileImageUrl.isNotEmpty;
     final Color avatarBackgroundColor = hasProfileImage

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:form_builder_validators/form_builder_validators.dart';
 
@@ -15,6 +15,8 @@ class ResetPasswordForm extends ConsumerStatefulWidget {
 
 class _ResetPasswordFormState extends ConsumerState<ResetPasswordForm> {
   final _formKey = GlobalKey<FormBuilderState>();
+  bool _obscurePassword = true;
+  bool _obscurePasswordConfirm = true;
 
   Future<void> _resetPassword() async {
     // 폼 유효성 검사
@@ -31,15 +33,6 @@ class _ResetPasswordFormState extends ConsumerState<ResetPasswordForm> {
     final state = ref.read(findAuthNotifierProvider);
     // final resetToken = state.resetToken;
     final email = state.inputContact;
-
-    // if (resetToken == null) {
-    //   if (mounted) {
-    //     ScaffoldMessenger.of(context).showSnackBar(
-    //       const SnackBar(content: Text('인증 정보가 없습니다. 다시 시도해주세요.')),
-    //     );
-    //   }
-    //   return;
-    // }
 
     try {
       // 비밀번호 재설정
@@ -102,17 +95,26 @@ class _ResetPasswordFormState extends ConsumerState<ResetPasswordForm> {
           // 새 비밀번호 입력
           FormBuilderTextField(
             name: 'newPassword',
-            decoration: const InputDecoration(
-              labelText: '새 비밀번호',
-            ),
-            obscureText: true,
+            decoration: InputDecoration(
+                labelText: '새 비밀번호',
+                suffixIcon: IconButton(
+                    onPressed: () {
+                      setState(() {
+                        _obscurePassword = !_obscurePassword;
+                      });
+                    },
+                    icon: Icon(_obscurePassword
+                        ? Icons.visibility
+                        : Icons.visibility_off))),
+            obscureText: _obscurePassword,
             autofocus: true,
             enabled: !isLoading,
             validator: FormBuilderValidators.compose([
               FormBuilderValidators.required(errorText: '비밀번호를 입력해주세요.'),
-              FormBuilderValidators.password(
-                errorText: '비밀번호는 8자 이상, 대/소문자, 특수문자를 포함해야 합니다.',
-              ),
+              FormBuilderValidators.minLength(4,
+                  errorText: '비밀번호는 4자 이상이어야 합니다.'),
+              FormBuilderValidators.maxLength(20,
+                  errorText: '비밀번호는 20자 이하여야 합니다.'),
             ]),
           ),
 
@@ -121,10 +123,18 @@ class _ResetPasswordFormState extends ConsumerState<ResetPasswordForm> {
           // 비밀번호 확인
           FormBuilderTextField(
             name: 'confirmPassword',
-            decoration: const InputDecoration(
-              labelText: '비밀번호 확인',
-            ),
-            obscureText: true,
+            decoration: InputDecoration(
+                labelText: '새 비밀번호 확인',
+                suffixIcon: IconButton(
+                    onPressed: () {
+                      setState(() {
+                        _obscurePasswordConfirm = !_obscurePasswordConfirm;
+                      });
+                    },
+                    icon: Icon(_obscurePasswordConfirm
+                        ? Icons.visibility
+                        : Icons.visibility_off))),
+            obscureText: _obscurePasswordConfirm,
             enabled: !isLoading,
             validator: FormBuilderValidators.compose([
               FormBuilderValidators.required(errorText: '비밀번호 확인을 입력해주세요.'),

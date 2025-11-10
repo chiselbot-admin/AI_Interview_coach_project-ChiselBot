@@ -182,31 +182,6 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
                 validator: _validateName,
               ),
               const SizedBox(height: 16),
-              // 휴대전화번호
-              // FormBuilderTextField(
-              //   name: 'phoneNumber',
-              //   textInputAction: TextInputAction.next,
-              //   keyboardType: TextInputType.phone,
-              //   enabled: !signUpState.isLoading,
-              //   decoration: const InputDecoration(
-              //     labelText: '휴대전화번호',
-              //     floatingLabelBehavior: FloatingLabelBehavior.auto,
-              //     border: OutlineInputBorder(),
-              //     enabledBorder: OutlineInputBorder(
-              //         borderSide: BorderSide(color: Colors.grey)),
-              //     focusedBorder: OutlineInputBorder(
-              //         borderSide: BorderSide(color: Colors.green)),
-              //   ),
-              //   validator: FormBuilderValidators.compose([
-              //     FormBuilderValidators.required(errorText: "휴대전화번호를 입력해주세요."),
-              //     FormBuilderValidators.match(
-              //       RegExp(r'^010-?([0-9]{4})-?([0-9]{4})$'),
-              //       errorText: "올바른 휴대전화번호 형식인지 확인해주세요.",
-              //     ),
-              //   ]),
-              // ),
-              // const SizedBox(height: 16),
-              // 이메일 + 인증 버튼
               Row(children: [
                 Flexible(
                   child: FormBuilderTextField(

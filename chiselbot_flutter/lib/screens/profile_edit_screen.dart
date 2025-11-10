@@ -133,7 +133,6 @@ class _ProfileEditScreenState extends ConsumerState<ProfileEditScreen> {
                     obscureText: _obscurePassword,
                     decoration: InputDecoration(
                       labelText: '새 비밀번호',
-                      hintText: '비밀번호를 입력하세요',
                       prefixIcon: const Icon(Icons.lock),
                       suffixIcon: IconButton(
                         icon: Icon(_obscurePassword
@@ -163,8 +162,7 @@ class _ProfileEditScreenState extends ConsumerState<ProfileEditScreen> {
                     controller: _passwordConfirmController,
                     obscureText: _obscurePasswordConfirm,
                     decoration: InputDecoration(
-                      labelText: '비밀번호 확인',
-                      hintText: '비밀번호를 다시 입력하세요',
+                      labelText: '새 비밀번호 확인',
                       prefixIcon: const Icon(Icons.lock_outline),
                       suffixIcon: IconButton(
                         icon: Icon(_obscurePasswordConfirm

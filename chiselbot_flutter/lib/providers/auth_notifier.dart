@@ -39,7 +39,8 @@ final authNotifierProvider =
   return AuthNotifier(repository, api);
 });
 
-final currentUserInfoProvider = Provider<(String, String, String?)>((ref) {
+final currentUserInfoProvider =
+    Provider<(String, String, String?, bool)>((ref) {
   final authState = ref.watch(authNotifierProvider);
 
   return authState.maybeWhen(
@@ -48,11 +49,11 @@ final currentUserInfoProvider = Provider<(String, String, String?)>((ref) {
         final name = user.name?.isNotEmpty == true ? user.name! : '개발자';
         final String displayEmail =
             user.email.contains('@') ? user.email : '# 카카오 로그인';
-        return (name, displayEmail, user.profileImageUrl);
+        return (name, displayEmail, user.profileImageUrl, true);
       }
-      return ('개발자', '로그인해주세요', null);
+      return ('개발자', '로그인해주세요', null, false);
     },
-    orElse: () => ('개발자', '로그인해주세요', null),
+    orElse: () => ('개발자', '로그인해주세요', null, false),
   );
 });
 

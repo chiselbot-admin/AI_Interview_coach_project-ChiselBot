@@ -19,7 +19,7 @@
                     <table class="table table-hover align-middle">
                         <thead>
                         <tr>
-                            <th style="width: 8%;">순번</th>
+                            <th style="width: 8%;">ID</th>
                             <th style="width: 32%;">질문</th>
                             <th style="width: 15%;">카테고리</th>
                             <th style="width: 12%;">작성자</th>
@@ -40,7 +40,7 @@
                         {{/questions}}
                         {{^questions}}
                             <tr>
-                                <td colspan="5" class="text-center text-muted">등록된 질문이 없습니다.</td>
+                                <td colspan="6" class="text-center text-muted">등록된 질문이 없습니다.</td>
                             </tr>
                         {{/questions}}
                         </tbody>
@@ -55,9 +55,25 @@
                                 </li>
                             {{/hasPrevious}}
 
-                            <li class="page-item active">
-                                <a class="page-link">{{currentPage}}</a>
-                            </li>
+                            {{#pageInfos}}
+                                <li class="page-item {{#current}}active{{/current}}">
+                                    {{#current}}
+                                        <a class="page-link text-white bg-primary border-primary"
+                                           tabindex="-1"
+                                           style="pointer-events: none; opacity: 0.85; cursor: default;">
+                                            {{number}}
+                                        </a>
+                                    {{/current}}
+
+                                    {{^current}}
+                                        <a class="page-link"
+                                           href="/admin/questions?page={{index}}"
+                                        style="cursor: pointer;">
+                                        {{number}}
+                                        </a>
+                                    {{/current}}
+                                </li>
+                            {{/pageInfos}}
 
                             {{#hasNext}}
                                 <li class="page-item">

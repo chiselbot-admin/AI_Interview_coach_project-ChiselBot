@@ -1,3 +1,4 @@
+import 'package:ai_interview/core/app_router.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -17,8 +18,10 @@ class NoticeListScreen extends ConsumerWidget {
         backgroundColor: Colors.orange.shade700,
       ),
       body: noticesAsync.when(
-        data: (notices) {
-          if (notices.isEmpty) {
+        data: (allNotices) {
+          final visibleNotices =
+              allNotices.where((notice) => notice.isVisible).toList();
+          if (visibleNotices.isEmpty) {
             return const Center(child: Text('공지사항이 없습니다.'));
           }
 
@@ -28,18 +31,15 @@ class NoticeListScreen extends ConsumerWidget {
             },
             child: ListView.separated(
               padding: const EdgeInsets.all(16),
-              itemCount: notices.length,
+              itemCount: visibleNotices.length,
               separatorBuilder: (_, __) => const Divider(height: 24),
               itemBuilder: (_, i) {
-                final notice = notices[i];
+                final notice = visibleNotices[i];
                 return NoticeListItem(
                   notice: notice,
                   onTap: () {
-                    Navigator.pushNamed(
-                      context,
-                      '/notice/detail',
-                      arguments: notice.id,
-                    );
+                    Navigator.pushNamed(context, RoutePaths.noticeDetail,
+                        arguments: notice.id);
                   },
                 );
               },

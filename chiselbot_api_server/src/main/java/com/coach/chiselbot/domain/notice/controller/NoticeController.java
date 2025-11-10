@@ -66,8 +66,9 @@ public class NoticeController {
     }
 
     @DeleteMapping("/{noticeId}")
-    public ResponseEntity<Void> deleteNotice(@PathVariable Long noticeId) {
-        noticeService.deleteNotice(noticeId);
+    public ResponseEntity<Void> deleteNotice(@PathVariable Long noticeId,
+                                             @SessionAttribute(value = Define.SESSION_USER) Admin admin) {
+        noticeService.deleteNotice(noticeId, admin);
         return ResponseEntity.noContent().build(); // 204 응답
     }
 
@@ -91,19 +92,22 @@ public class NoticeController {
 
     /** 공지사항 등록 **/
     @PostMapping
+    @ResponseBody
     public ResponseEntity<Long> createNotice(@RequestBody NoticeRequest.CreateNotice reqDTO,
-                                             @ModelAttribute(value = Define.SESSION_USER) Admin admin) {
+                                             @SessionAttribute(value = Define.SESSION_USER) Admin admin) {
 
-        Long id = noticeService.createNotice(reqDTO, admin);
-        return ResponseEntity.ok(id);
+        noticeService.createNotice(reqDTO, admin);
+        return ResponseEntity.noContent().build();
     }
 
 
     /** 공지사항 수정 */
     @PutMapping("/{id}")
     @ResponseBody
-    public ResponseEntity<Void> updateNotice(@PathVariable Long id, @RequestBody NoticeRequest.UpdateNotice reqDTO) {
-        noticeService.updateNotice(id, reqDTO);
+    public ResponseEntity<Void> updateNotice(@PathVariable Long id,
+                                             @RequestBody NoticeRequest.UpdateNotice reqDTO,
+                                             @SessionAttribute(value = Define.SESSION_USER) Admin admin) {
+        noticeService.updateNotice(id, reqDTO, admin);
         return ResponseEntity.noContent().build();
     }
 }

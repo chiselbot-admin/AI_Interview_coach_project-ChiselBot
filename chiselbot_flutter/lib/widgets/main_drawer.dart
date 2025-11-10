@@ -11,7 +11,8 @@ class MainDrawer extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final (userName, userEmail, _) = ref.watch(currentUserInfoProvider);
+    final (userName, userEmail, _, isLoggedIn) =
+        ref.watch(currentUserInfoProvider);
     final screenWidth = MediaQuery.of(context).size.width;
     final state = ref.watch(storageListProvider);
     return Drawer(
@@ -38,11 +39,21 @@ class MainDrawer extends ConsumerWidget {
                       ),
                     ),
                     const SizedBox(height: 8),
-                    Text(
-                      userEmail,
-                      style: const TextStyle(
-                        color: Colors.white70,
-                        fontSize: 14,
+                    GestureDetector(
+                      onTap: isLoggedIn
+                          ? null
+                          : () {
+                              Navigator.pop(context);
+                              Navigator.of(context).pushNamed(RoutePaths.login);
+                            },
+                      child: Text(
+                        userEmail,
+                        style: TextStyle(
+                          color: isLoggedIn ? Colors.white70 : Colors.blue,
+                          fontSize: 14,
+                          decoration:
+                              isLoggedIn ? null : TextDecoration.underline,
+                        ),
                       ),
                     ),
                   ],

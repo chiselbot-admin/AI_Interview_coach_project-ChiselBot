@@ -64,7 +64,7 @@ class _EmailLoginScreenState extends ConsumerState<EmailLoginScreen> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const SizedBox(height: 40),
+              // const SizedBox(height: 40),
               FormBuilderTextField(
                 name: 'email',
                 decoration: const InputDecoration(
@@ -181,7 +181,7 @@ class _EmailLoginScreenState extends ConsumerState<EmailLoginScreen> {
                   ),
                 ],
               ),
-              const SizedBox(height: 100),
+              // const SizedBox(height: 100),
             ],
           ),
         ),
