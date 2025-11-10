@@ -13,6 +13,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -38,7 +39,7 @@ public class InterviewQuestionService {
     @Transactional(readOnly = true)
     public Page<QuestionResponse.FindAll> getQuestionList(int page){
         int pageSize = 10;
-        Pageable pageable = PageRequest.of(page, pageSize);
+        Pageable pageable = PageRequest.of(page, pageSize, Sort.by("questionId").descending());
 
         return interviewQuestionRepository.findAll(pageable).map(QuestionResponse.FindAll::new);
     }
