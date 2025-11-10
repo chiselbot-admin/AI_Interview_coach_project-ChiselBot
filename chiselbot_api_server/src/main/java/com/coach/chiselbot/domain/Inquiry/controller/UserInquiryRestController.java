@@ -69,10 +69,11 @@ public class UserInquiryRestController {
      */
     @GetMapping
     public ResponseEntity<CommonResponseDto<Page<InquiryResponseDTO.UserInquiryList>>> list(
+            @RequestAttribute("userEmail") String email,
             @PageableDefault(size = 10, sort = "id", direction = Sort.Direction.DESC)
             Pageable pageable
     ) {
-        Page<InquiryResponseDTO.UserInquiryList> inquiries = inquiryService.findInquiries(pageable);
+        Page<InquiryResponseDTO.UserInquiryList> inquiries = inquiryService.findInquiries(pageable, email);
         return ResponseEntity.ok(CommonResponseDto.success(inquiries));
     }
 

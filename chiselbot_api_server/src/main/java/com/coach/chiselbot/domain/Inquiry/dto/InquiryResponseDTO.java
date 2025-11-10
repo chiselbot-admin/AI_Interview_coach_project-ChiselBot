@@ -5,6 +5,7 @@ import com.coach.chiselbot.domain.Inquiry.InquiryStatus;
 import com.coach.chiselbot.domain.answer.Answer;
 import com.coach.chiselbot.domain.notice.Notice;
 import lombok.*;
+import lombok.extern.slf4j.Slf4j;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -53,10 +54,11 @@ public class InquiryResponseDTO {
             this.userEmail = inquiry.getUser().getEmail();
             this.status = inquiry.getStatus();
 
+
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
             // view에 띄우기 위해 포맷(yyyy-MM-dd HH:mm)
             this.createdAt = inquiry.getCreatedAt() != null ? inquiry.getCreatedAt().format(formatter) : null;
-            this.answerCreatedAt = inquiry.getAnswer().getCreatedAt() != null ? inquiry.getAnswer().getCreatedAt().format(formatter) : null;
+            this.answerCreatedAt = inquiry.getAnswer() != null && inquiry.getAnswer().getCreatedAt() != null  ? inquiry.getAnswer().getCreatedAt().format(formatter) : null;
         }
 
         public static AdminInquiryList from(Inquiry inquiry) {

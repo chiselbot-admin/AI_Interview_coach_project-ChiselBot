@@ -18,7 +18,7 @@ void main() async {
     nativeAppKey: dotenv.env['KAKAO_NATIVE_APP_KEY']!,
   );
 
-  runApp(const ProviderScope(child: Root()));
+  runApp(const ProviderScope(child: MyApp()));
 }
 
 Future<void> printKeyHash() async {
@@ -37,31 +37,21 @@ class MyApp extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final themeMode = ref.watch(themeNotifierProvider);
 
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      title: "ChiselBot, AI Interview Coach",
-      theme: AppTheme.lightTheme,
-      darkTheme: AppTheme.darkTheme,
-      themeMode: themeMode.themeMode,
-      onGenerateRoute: AppRouter.generateRoute,
-      initialRoute: RoutePaths.root, // 로그인 화면으로
-    );
-  }
-}
-
-class Root extends ConsumerWidget {
-  const Root({super.key});
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    // Riverpod에서 동일 인스턴스 꺼내오기
     final api = ref.watch(apiServiceProvider);
     final qna = ref.watch(qnaChangeNotifierProvider);
 
     return AppProviders.inject(
       api: api,
       qna: qna,
-      child: const MyApp(),
+      child: MaterialApp(
+        debugShowCheckedModeBanner: false,
+        title: "ChiselBot, AI Interview Coach",
+        theme: AppTheme.lightTheme,
+        darkTheme: AppTheme.darkTheme,
+        themeMode: themeMode.themeMode,
+        onGenerateRoute: AppRouter.generateRoute,
+        initialRoute: RoutePaths.login,
+      ),
     );
   }
 }

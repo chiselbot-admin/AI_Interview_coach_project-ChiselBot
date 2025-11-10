@@ -9,6 +9,7 @@ import com.coach.chiselbot.domain.Inquiry.dto.InquiryResponseDTO;
 import com.coach.chiselbot.domain.user.User;
 import com.coach.chiselbot.domain.user.UserJpaRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -19,6 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.stream.IntStream;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 @Transactional
@@ -113,8 +115,13 @@ public class InquiryService {
     /**
      * 사용자 문의 목록 조회 처리
      */
-    public Page<InquiryResponseDTO.UserInquiryList> findInquiries(Pageable pageable) {
-        Page<Inquiry> inquiries = inquiryRepository.findAll(pageable);
+    public Page<InquiryResponseDTO.UserInquiryList> findInquiries(Pageable pageable, String email) {
+
+        User user = userJpaRepository.findByEmail(email)
+                .orElseThrow(() -> new Exception404("사용자를 찾을 수 없습니다."));
+
+        //Page<Inquiry> inquiries = inquiryRepository.findAllByUserEmail(pageable, user);
+        Page<Inquiry> inquiries = inquiryRepository.findAllByUser_Email(email, pageable);
         return inquiries.map(InquiryResponseDTO.UserInquiryList::from);
     }
 

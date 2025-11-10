@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+// 모범 답안
 class ModelWithDiff extends StatelessWidget {
   final String model;
   final String user;
