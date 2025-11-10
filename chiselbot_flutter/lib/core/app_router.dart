@@ -46,8 +46,8 @@ class AppRouter {
   static Route<dynamic>? generateRoute(RouteSettings settings) {
     switch (settings.name) {
       case RoutePaths.root:
-        // return MaterialPageRoute(builder: (_) => const SplashScreen());
-        return MaterialPageRoute(builder: (_) => const EmailLoginScreen());
+        return MaterialPageRoute(builder: (_) => const SplashScreen());
+      // return MaterialPageRoute(builder: (_) => const EmailLoginScreen());
       // return MaterialPageRoute(builder: (_) => const MainScreen());
       case RoutePaths.main:
         return MaterialPageRoute(builder: (_) => const MainScreen());

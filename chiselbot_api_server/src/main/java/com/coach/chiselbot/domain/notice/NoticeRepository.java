@@ -13,5 +13,5 @@ public interface NoticeRepository extends JpaRepository<Notice, Long> {
     Optional<Notice> findFirstByNoticeIdLessThanOrderByNoticeIdDesc(Long id); // 이전글
     Optional<Notice> findFirstByNoticeIdGreaterThanOrderByNoticeIdAsc(Long id); // 다음글
 
-    List<Notice> findByIsVisibleTrue();
+    List<Notice> findByIsVisibleTrueOrderByNoticeIdDesc();
 }

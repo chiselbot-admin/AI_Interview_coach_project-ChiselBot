@@ -1,6 +1,8 @@
 package com.coach.chiselbot.domain.Inquiry;
 
 import com.coach.chiselbot.domain.dashboard.MonthlyInquiryStats;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -16,8 +18,15 @@ public interface InquiryRepository extends JpaRepository<Inquiry, Long> {
     Optional<Inquiry> findByIdWithAnswer(@Param("id") Long id);
 
     // 문의 전체 조회
-    @Query("SELECT i FROM Inquiry i JOIN FETCH i.user u LEFT JOIN FETCH i.answer a LEFT JOIN FETCH a.admin ad ORDER BY i.createdAt DESC")
-    List<Inquiry> findAllWithUserAnswer();
+    @Query(
+            value = "SELECT DISTINCT i FROM Inquiry i " +
+                    "JOIN FETCH i.user u " +
+                    "LEFT JOIN FETCH i.answer a " +
+                    "LEFT JOIN FETCH a.admin ad " +
+                    "ORDER BY i.createdAt DESC",
+            countQuery = "SELECT COUNT(i) FROM Inquiry i"
+    )
+    Page<Inquiry> findAllWithUserAnswer(Pageable pageable);
 
     // 오늘 등록된 문의 수
     @Query("SELECT COUNT(i) FROM Inquiry i WHERE i.createdAt >= :startOfDay")

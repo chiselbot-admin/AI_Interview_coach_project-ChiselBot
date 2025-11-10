@@ -1,12 +1,19 @@
 package com.coach.chiselbot.domain.Inquiry.dto;
 
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 public class InquiryRequestDTO {
+
+    @Getter
+    @Setter
+    @ToString
+    @AllArgsConstructor
+    public static class PageInfo {
+        private int number;      // 1-based 표시용
+        private int index;       // 0-based 실제 쿼리 파라미터용
+        private boolean current; // 현재 페이지 여부
+    }
 
     @Getter
     @Setter

@@ -12,14 +12,14 @@
                 <div class="table-container">
                     <div class="d-flex justify-content-between align-items-center mb-2">
                         <div class="page-info">
-                            총 {{inquiries.size}}개의 문의
+                            총 {{totalElements}}개의 문의
                         </div>
                     </div>
 
                     <table class="table table-hover align-middle">
                         <thead>
                         <tr>
-                            <th style="width: 6%;">번호</th>
+                            <th style="width: 6%;">ID</th>
                             <th style="width: 25%;">제목</th>
                             <th style="width: 18%;">작성자 이메일</th>
                             <th style="width: 12%;">상태</th>
@@ -31,7 +31,7 @@
                         <tbody>
                         {{#inquiries}}
                             <tr>
-                                <td>{{displayNumber}}</td>
+                                <td>{{inquiryId}}</td>
                                 <td>{{title}}</td>
                                 <td>{{userName}}</td>
                                 <td>
@@ -56,11 +56,46 @@
 
                         {{^inquiries}}
                             <tr>
-                                <td colspan="6" class="text-center text-muted">등록된 문의가 없습니다.</td>
+                                <td colspan="7" class="text-center text-muted">등록된 문의가 없습니다.</td>
                             </tr>
                         {{/inquiries}}
                         </tbody>
                     </table>
+
+                    <nav aria-label="Page navigation" class="mt-4">
+                        <ul class="pagination justify-content-center">
+                            {{#hasPrevious}}
+                                <li class="page-item">
+                                    <a class="page-link" href="/admin/inquiries?page={{prevPage}}">이전</a>
+                                </li>
+                            {{/hasPrevious}}
+
+                            {{#pageInfos}}
+                                {{#current}}
+                                    <a class="page-link text-white bg-primary border-primary"
+                                       tabindex="-1"
+                                       style="pointer-events: none; opacity: 0.85; cursor: default;">
+                                        {{number}}
+                                    </a>
+                                {{/current}}
+
+                                {{^current}}
+                                    <a class="page-link"
+                                       href="/admin/inquiries?page={{index}}"
+                                    style="cursor: pointer;">
+                                    {{number}}
+                                    </a>
+                                {{/current}}
+                            {{/pageInfos}}
+
+                            {{#hasNext}}
+                                <li class="page-item">
+                                    <a class="page-link" href="/admin/inquiries?page={{nextPage}}">다음</a>
+                                </li>
+                            {{/hasNext}}
+                        </ul>
+                    </nav>
+
                 </div>
             </div>
         </div>
@@ -85,6 +120,11 @@
     .pagination {
         justify-content: center;
         margin-top: 20px;
+    }
+    .pagination .page-item.active .page-link {
+        background-color: #0d6efd;
+        border-color: #0d6efd;
+        color: white;
     }
     .page-info {
         text-align: center;

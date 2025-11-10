@@ -18,8 +18,8 @@ class LoginScreen extends ConsumerWidget {
           children: [
             _buildKakaoLoginButton(context, ref),
             const SizedBox(height: 16),
-            _buildGoogleLoginButton(),
-            const SizedBox(height: 16),
+            // _buildGoogleLoginButton(),
+            // const SizedBox(height: 16),
             _buildEmailLoginButton(context),
           ],
         ),

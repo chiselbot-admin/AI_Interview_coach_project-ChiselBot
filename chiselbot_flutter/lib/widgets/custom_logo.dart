@@ -10,7 +10,10 @@ class CustomLogo extends StatelessWidget {
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        Image.asset(Constants.logoAddress),
+        Image.asset(
+          Constants.logoAddress,
+          height: 160,
+        ),
         SizedBox(height: 16),
         const Text(
           "ChiselBot",

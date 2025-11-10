@@ -10,7 +10,9 @@ import com.coach.chiselbot.domain.user.User;
 import com.coach.chiselbot.domain.user.UserJpaRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -36,21 +38,14 @@ public class InquiryService {
     }
 
     /**
-     * 관리자 리스트 조회 처리
+     * 관리자 목록 조회 처리
      */
-    public List<InquiryResponseDTO.AdminInquiryList> adminInquiryList() {
-        List<Inquiry> inquiries = inquiryRepository.findAllWithUserAnswer();
+    public Page<InquiryResponseDTO.AdminInquiryList> adminInquiryList(int page) {
 
-        return IntStream.range(0, inquiries.size())
-                .mapToObj(i -> {
-                    Inquiry inquiry = inquiries.get(i);
-                    InquiryResponseDTO.AdminInquiryList dto =
-                            InquiryResponseDTO.AdminInquiryList.from(inquiry);
-                    dto.setDisplayNumber(i + 1);
+        int pageSize = 10;
+        Pageable pageable = PageRequest.of(page, pageSize, Sort.by("id").descending());
 
-                    return dto;
-                })
-                .toList();
+        return inquiryRepository.findAllWithUserAnswer(pageable).map(InquiryResponseDTO.AdminInquiryList::new);
     }
 
     /**

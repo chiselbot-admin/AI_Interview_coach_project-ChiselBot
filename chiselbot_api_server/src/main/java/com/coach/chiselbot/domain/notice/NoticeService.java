@@ -38,8 +38,7 @@ public class NoticeService {
 
     public List<NoticeResponse.FindAll> getNoticeList(){
 
-        //List<NoticeResponse.FindAll> noticeList = noticeRepository.findAll();
-        List<Notice> noticeList = noticeRepository.findByIsVisibleTrue();
+        List<Notice> noticeList = noticeRepository.findByIsVisibleTrueOrderByNoticeIdDesc();
         NoticeResponse.FindAll.from(noticeList);
 
         return NoticeResponse.FindAll.from(noticeList);
