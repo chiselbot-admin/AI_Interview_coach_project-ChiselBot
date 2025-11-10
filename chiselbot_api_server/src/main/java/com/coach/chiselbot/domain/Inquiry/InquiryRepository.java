@@ -47,4 +47,10 @@ public interface InquiryRepository extends JpaRepository<Inquiry, Long> {
     ORDER BY EXTRACT(MONTH FROM i.regdate)
 """, nativeQuery = true)
     List<MonthlyInquiryStats> countInquiriesByYear(@Param("year") int year);
+
+    @Query(
+            value = "SELECT i FROM Inquiry i JOIN FETCH i.user u WHERE u.email = :email",
+            countQuery = "SELECT COUNT(i) FROM Inquiry i JOIN i.user u WHERE u.email = :email"
+    )
+    Page<Inquiry> findAllByUser_Email(@Param("email") String email, Pageable pageable);
 }
