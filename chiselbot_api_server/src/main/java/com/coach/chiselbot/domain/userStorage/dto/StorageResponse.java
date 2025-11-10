@@ -26,6 +26,8 @@ public class StorageResponse {
         private final String createdAt;
         private final String questionAnswer;
         private final String grade;
+        private final String intentText;
+        private final String pointText;
 
         public FindById(UserStorage storage) {
             this.storageId = storage.getStorageId();
@@ -42,6 +44,8 @@ public class StorageResponse {
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
             this.createdAt = storage.getCreatedAt() != null ? storage.getCreatedAt().format(formatter) : null;
             this.grade = storage.getGrade();
+            this.pointText = storage.getQuestion().getPointText();
+            this.intentText = storage.getQuestion().getIntentText();
         }
 
         private String nvl(String value) {
@@ -63,6 +67,9 @@ public class StorageResponse {
         private final String interviewLevel;
         private final String categoryName;
         private final String createdAt;
+        private final String grade;
+        private final String intentText;
+        private final String pointText;
 
         public FindAll(UserStorage storage) {
             this.storageId = storage.getStorageId();
@@ -77,6 +84,9 @@ public class StorageResponse {
             this.categoryName = storage.getQuestion().getCategoryId().getName();
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
             this.createdAt = storage.getCreatedAt() != null ? storage.getCreatedAt().format(formatter) : null;
+            this.grade = storage.getGrade();
+            this.pointText = storage.getQuestion().getPointText();
+            this.intentText = storage.getQuestion().getIntentText();
         }
 
         public static List<StorageResponse.FindAll> from(List<UserStorage> questions){
