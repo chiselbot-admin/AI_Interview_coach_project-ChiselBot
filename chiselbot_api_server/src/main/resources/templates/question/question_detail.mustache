@@ -52,10 +52,12 @@
                         </div>
 
                         <!-- 답변 -->
-                        <div class="mb-3" id="answerGroup">
-                            <label class="form-label">모범 답변</label>
-                            <textarea class="form-control" name="answerText" rows="3">{{question.answerText}}</textarea>
-                        </div>
+                        {{#question.answerText}}
+                            <div class="mb-3" id="answerGroup">
+                                <label class="form-label">모범 답변</label>
+                                <textarea class="form-control" name="answerText" rows="3">{{question.answerText}}</textarea>
+                            </div>
+                        {{/question.answerText}}
 
                         <div class="d-flex justify-content-between align-items-center mt-4">
                             <div class="flex-grow-1 text-center">
