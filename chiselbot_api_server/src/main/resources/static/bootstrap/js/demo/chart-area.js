@@ -29,34 +29,41 @@ function renderInquiryChart(year) {
   fetch(`/admin/inquiry-stats/year?year=${year}`)
     .then(res => res.json())
     .then(data => {
-      const labels = data.map(item => `${parseInt(item.month)}월`);
-      const counts = data.map(item => item.count);
+        const labels = ["1월","2월","3월","4월","5월","6월","7월","8월","9월","10월","11월","12월"];
 
-      const titleEl = document.getElementById('chartTitle');
-      if (titleEl) titleEl.textContent = `${year}년 월별 문의 현황`;
+        const dataMap = {};
+        data.forEach(item => dataMap[parseInt(item.month)] = item.count);
 
-      if (chart) chart.destroy();
+        const counts = labels.map((_, i) => dataMap[i + 1] || 0);
 
       chart = new Chart(ctx, {
-        type: 'line',
-        data: {
-          labels: labels,
-          datasets: [{
-            label: `${year}년 월별 문의 수`,
-            lineTension: 0.3,
-            backgroundColor: "rgba(78, 115, 223, 0.05)",
-            borderColor: "rgba(78, 115, 223, 1)",
-            pointRadius: 3,
-            pointBackgroundColor: "rgba(78, 115, 223, 1)",
-            pointBorderColor: "rgba(78, 115, 223, 1)",
-            pointHoverRadius: 3,
-            pointHoverBackgroundColor: "rgba(78, 115, 223, 1)",
-            pointHoverBorderColor: "rgba(78, 115, 223, 1)",
-            pointHitRadius: 10,
-            pointBorderWidth: 2,
-            data: counts,
-          }],
-        },
+         type: 'bar', // 기본 타입을 막대로
+          data: {
+            labels: labels,
+            datasets: [
+              {
+                type: 'bar',
+                label: `${year}년 월별 문의 수`,
+                data: counts,
+                backgroundColor: [
+                  'rgba(255, 159, 64, 0.7)',  // 1월
+                  'rgba(255, 159, 64, 0.7)',  // 2월
+                  'rgba(255, 159, 64, 0.7)',  // 3월
+                  'rgba(255, 205, 86, 0.7)',  // 4월
+                  'rgba(255, 205, 86, 0.7)',  // 5월
+                  'rgba(255, 205, 86, 0.7)',  // 6월
+                  'rgba(255, 99, 132, 0.7)',  // 7월
+                  'rgba(255, 99, 132, 0.7)',  // 8월
+                  'rgba(255, 99, 132, 0.7)',  // 9월
+                  'rgba(153, 102, 255, 0.7)', // 10월
+                  'rgba(153, 102, 255, 0.7)', // 11월
+                  'rgba(153, 102, 255, 0.7)', // 12월
+                ],
+                borderColor: 'rgba(255, 255, 255, 1)',
+                borderWidth: 1,
+              }
+            ],
+          },
         options: {
           maintainAspectRatio: false,
           layout: {
@@ -69,13 +76,15 @@ function renderInquiryChart(year) {
             }],
             yAxes: [{
               ticks: {
-                beginAtZero: true,
-                maxTicksLimit: 4,
-                padding: 10,
-                callback: function (value) {
-                  return number_format(value) + '건';
-                }
-              },
+                  beginAtZero: true,
+                  suggestedMin: 0,   // 기본 최소값
+                  suggestedMax: 60,  // 기본 최대값
+                  stepSize: 20,      // 눈금 간격
+                  padding: 10,
+                  callback: function (value) {
+                    return number_format(value) + '건';
+                  }
+                },
               gridLines: {
                 color: "rgb(234, 236, 244)",
                 zeroLineColor: "rgb(234, 236, 244)",
@@ -121,4 +130,28 @@ document.addEventListener('DOMContentLoaded', () => {
 
   yearSelect.addEventListener('change', e => renderInquiryChart(e.target.value));
   renderInquiryChart(yearSelect.value); // 초기 로드
+});
+
+Chart.plugins.register({
+  afterDraw: function (chart) {
+    if (!chart.data.datasets.length) return;
+
+    const data = chart.data.datasets[0].data;
+    const isAllZero = data.every(v => v === 0);
+
+    if (isAllZero) {
+      const ctx = chart.chart.ctx;
+      const width = chart.chart.width;
+      const height = chart.chart.height;
+      chart.clear();
+
+      ctx.save();
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.font = "16px 'Noto Sans KR'";
+      ctx.fillStyle = '#999';
+      ctx.fillText('데이터 없음', width / 2, height / 2);
+      ctx.restore();
+    }
+  }
 });

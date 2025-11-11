@@ -1,6 +1,7 @@
 package com.coach.chiselbot.domain.admin;
 
 import com.coach.chiselbot._global.common.Define;
+import com.coach.chiselbot.domain.admin.dto.AdminRequestDto;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;

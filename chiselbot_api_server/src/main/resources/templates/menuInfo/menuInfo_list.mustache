@@ -44,7 +44,15 @@
                                     <td><span class="badge bg-secondary">비공개</span></td>
                                 {{/visible}}
                                 <td>
-                                    <a href="/admin/menus/update/{{id}}" class="btn btn-sm btn-primary">상세보기</a>
+                                    {{#isMenuManagement}}
+                                        <button class="btn btn-sm btn-secondary" disabled onclick="alert('이 메뉴는 수정할 수 없습니다.');">
+                                            수정 불가
+                                        </button>
+                                    {{/isMenuManagement}}
+
+                                    {{^isMenuManagement}}
+                                        <a href="/admin/menus/update/{{id}}" class="btn btn-sm btn-primary">상세보기</a>
+                                    {{/isMenuManagement}}
                                 </td>
                             </tr>
                         {{/menuInfo}}

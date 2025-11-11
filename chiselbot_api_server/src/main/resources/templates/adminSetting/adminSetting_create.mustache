@@ -1,0 +1,130 @@
+{{> layout/header }}
+<body id="page-top">
+<div id="wrapper">
+    {{> layout/sidebar }}
+    <div id="content-wrapper" class="d-flex flex-column">
+        <div id="content">
+            {{> layout/topbar }}
+
+            <!-- 레이아웃 작업 부분 -->
+            <div class="container mt-5">
+                <h2 class="mb-4 text-center fw-bold">새 관리자 등록</h2>
+
+                <div class="form-container mx-auto" style="max-width: 600px;">
+                    <form id="adminCreateForm" method="post" action="/admin/settings/create">
+
+                        <!-- 이름 -->
+                        <div class="mb-3">
+                            <label for="adminName" class="form-label fw-semibold">이름</label>
+                            <input type="text" class="form-control" id="adminName" name="adminName"
+                                   placeholder="관리자 이름을 입력하세요" required>
+                        </div>
+
+                        <!-- 이메일 -->
+                        <div class="mb-3">
+                            <label for="email" class="form-label fw-semibold">이메일</label>
+                            <div class="input-group">
+                                <input type="email" class="form-control" id="email" name="email"
+                                       placeholder="example@domain.com" required>
+                                <button type="button" class="btn btn-outline-secondary" id="checkEmailBtn">중복검사</button>
+                            </div>
+                            <div id="emailMessage" class="form-text mt-1"></div>
+                        </div>
+
+                        <!-- 비밀번호 -->
+                        <div class="mb-4">
+                            <label for="password" class="form-label fw-semibold">비밀번호</label>
+                            <input type="password" class="form-control" id="password" name="password"
+                                   placeholder="비밀번호를 입력하세요" required>
+                        </div>
+
+                        <div class="d-flex justify-content-between">
+                            <a href="/admin/settings" class="btn btn-outline-secondary">목록으로</a>
+                            <button type="submit" id="submitBtn" class="btn btn-primary" disabled>등록</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        {{> layout/footer }}
+    </div>
+</div>
+
+<style>
+    body {
+        background-color: #f8f9fa;
+    }
+
+    .form-container {
+        background: #ffffff;
+        border-radius: 8px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        padding: 30px;
+    }
+
+    .form-label {
+        color: #495057;
+    }
+
+    #emailMessage {
+        font-weight: 500;
+    }
+</style>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const emailInput = document.getElementById("email");
+        const checkBtn = document.getElementById("checkEmailBtn");
+        const msg = document.getElementById("emailMessage");
+        const submitBtn = document.getElementById("submitBtn");
+
+        let emailValid = false;
+
+        checkBtn.addEventListener("click", async function() {
+            const email = emailInput.value.trim();
+            if (!email) {
+                msg.textContent = "이메일을 입력해주세요.";
+                msg.style.color = "red";
+                emailValid = false;
+                return;
+            }
+
+            try {
+                const res = await fetch(`/admin/settings/check-email?email=${encodeURIComponent(email)}`);
+                if (!res.ok) throw new Error("요청 실패");
+                const exists = await res.json();
+
+                if (exists) {
+                    msg.textContent = "이미 등록된 이메일입니다.";
+                    msg.style.color = "red";
+                    emailValid = false;
+                    submitBtn.disabled = true;
+                } else {
+                    msg.textContent = "사용 가능한 이메일입니다.";
+                    msg.style.color = "green";
+                    emailValid = true;
+                    submitBtn.disabled = false;
+                }
+            } catch (e) {
+                console.error(e);
+                msg.textContent = "중복검사 중 오류가 발생했습니다.";
+                msg.style.color = "red";
+                emailValid = false;
+                submitBtn.disabled = true;
+            }
+        });
+
+        // 이메일 입력값 바뀌면 다시 검사 필요
+        emailInput.addEventListener("input", () => {
+            emailValid = false;
+            submitBtn.disabled = true;
+            msg.textContent = "";
+        });
+    });
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
+        crossorigin="anonymous"></script>
+</body>
+</html>

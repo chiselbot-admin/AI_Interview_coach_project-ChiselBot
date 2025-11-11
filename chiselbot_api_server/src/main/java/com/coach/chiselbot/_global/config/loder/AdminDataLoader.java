@@ -153,6 +153,14 @@ public class AdminDataLoader implements CommandLineRunner {
                     .description("프롬프트 관리")
                     //.parent(dashboard) // 부모 연결 가능
                     .build());
+            MenuInfo adminMenu = menuInfoRepository.save(MenuInfo.builder()
+                    .menuName("관리자 관리")
+                    .menuCode("ADMIN")
+                    .urlPath("/admin/settings")
+                    .menuOrder(4)
+                    .description("관리자 관리")
+                    //.parent(dashboard) // 부모 연결 가능
+                    .build());
         }
 
         // 프롬프트 더미

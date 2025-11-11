@@ -1,0 +1,231 @@
+{{> layout/header }}
+<body id="page-top">
+<div id="wrapper">
+    {{> layout/sidebar }}
+    <div id="content-wrapper" class="d-flex flex-column">
+        <div id="content">
+            {{> layout/topbar }}
+
+            <!-- 레이아웃 작업 부분 -->
+            <div class="container mt-5">
+                <h2 class="mb-4 text-center fw-bold">관리자 계정 목록</h2>
+
+                <div class="table-container">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <div class="page-info">
+                            총 {{totalElements}}명의 관리자
+                        </div>
+                        <a href="/admin/settings/create" class="btn btn-sm btn-primary">새 관리자 추가</a>
+                    </div>
+
+                    <table class="table table-hover align-middle" id="adminTable">
+                        <thead>
+                        <tr>
+                            <th style="width: 10%;">ID</th>
+                            <th style="width: 25%;">이름</th>
+                            <th style="width: 35%;">이메일</th>
+                            <th style="width: 20%;">등록일</th>
+                            <th style="width: 10%;">상세</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {{#adminPage.content}}
+                            <tr>
+                                <td>{{id}}</td>
+                                <td>{{adminName}}</td>
+                                <td>{{email}}</td>
+                                <td>{{createdAt}}</td>
+                                <td>
+                                    <button type="button"
+                                            class="btn btn-sm btn-outline-primary btn-detail"
+                                            data-id="{{id}}">
+                                        상세보기
+                                    </button>
+                                </td>
+                            </tr>
+                        {{/adminPage.content}}
+
+                        {{^adminPage.content}}
+                            <tr>
+                                <td colspan="5" class="text-center text-muted">등록된 관리자가 없습니다.</td>
+                            </tr>
+                        {{/adminPage.content}}
+                        </tbody>
+                    </table>
+
+                    <!-- 페이지네이션 -->
+                    <nav>
+                        <ul class="pagination justify-content-center">
+                            {{#hasPrevious}}
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{prevPage}}">이전</a>
+                                </li>
+                            {{/hasPrevious}}
+
+                            {{#pageInfos}}
+                                <li class="page-item {{#current}}active{{/current}}">
+                                    {{#current}}
+                                        <a class="page-link text-white bg-primary border-primary"
+                                           tabindex="-1"
+                                           style="pointer-events: none; opacity: 0.85; cursor: default;">
+                                            {{number}}
+                                        </a>
+                                    {{/current}}
+                                    {{^current}}
+                                        <a class="page-link" href="?page={{index}}">{{number}}</a>
+                                    {{/current}}
+                                </li>
+                            {{/pageInfos}}
+
+                            {{#hasNext}}
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{nextPage}}">다음</a>
+                                </li>
+                            {{/hasNext}}
+                        </ul>
+                    </nav>
+                </div>
+            </div>
+        </div>
+        {{> layout/footer }}
+    </div>
+</div>
+
+<!--모달-->
+<div class="modal fade" id="adminDetailModal" tabindex="-1" aria-labelledby="adminDetailLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title" id="adminDetailLabel">관리자 상세 정보</h5>
+
+                <button type="button"
+                        class="btn-close btn-close-white"
+                        id="modalCloseBtn"
+                        data-bs-dismiss="modal"
+                        aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p><strong>ID:</strong> <span id="modalId"></span></p>
+                <p><strong>이름:</strong> <span id="modalName"></span></p>
+                <p><strong>이메일:</strong> <span id="modalEmail"></span></p>
+                <p><strong>등록일:</strong> <span id="modalCreatedAt"></span></p>
+                <hr>
+                <div class="d-flex justify-content-between">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">닫기</button>
+<!--                    <button class="btn btn-outline-danger" id="deleteBtn">삭제</button> DB문제로 비활성화-->
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+
+      function getModalInstance() {
+        const el = document.getElementById('adminDetailModal');
+        let modal = bootstrap.Modal.getInstance(el);
+        if (!modal) {
+          modal = new bootstrap.Modal(el, { backdrop: true, keyboard: true });
+        }
+        return modal;
+      }
+
+      async function openDetailById(id) {
+        console.log("상세보기 클릭됨:", id);
+        try {
+          const res = await fetch(`/admin/settings/api/${id}`);
+          if (!res.ok) throw new Error('상세 조회 실패');
+          const data = await res.json();
+
+          // 데이터 확인 로그
+          console.log("상세데이터:", data);
+
+          // 데이터 바인딩
+          document.getElementById("modalId").innerText = data.id ?? '';
+          document.getElementById("modalName").innerText = data.adminName ?? '';
+          document.getElementById("modalEmail").innerText = data.email ?? '';
+          document.getElementById("modalCreatedAt").innerText = data.createdAt ?? '';
+
+          /*const deleteBtn = document.getElementById("deleteBtn");
+          deleteBtn.onclick = async function () {
+            console.log("🟢 삭제 버튼 클릭됨");
+            if (!confirm("정말 삭제하시겠습니까?")) return;
+
+            try {
+              const delRes = await fetch(`/admin/settings/api/${id}`, {
+                method: "DELETE"
+              });
+
+              console.log("삭제 요청 응답:", delRes.status);
+
+              if (!delRes.ok) throw new Error('삭제 실패');
+
+              const modal = getModalInstance();
+              modal.hide();
+              alert("삭제가 완료되었습니다.");
+              location.reload();
+            } catch (e) {
+              console.error("삭제 중 오류:", e);
+              alert(e.message || '삭제 중 오류가 발생했습니다.');
+            }
+          };*/
+
+          const modal = getModalInstance();
+          modal.show();
+
+        } catch (e) {
+          console.error("상세조회 중 오류:", e);
+          alert('상세 정보를 불러오지 못했습니다.');
+        }
+      }
+
+      document.addEventListener('click', function (e) {
+        const btn = e.target.closest('.btn-detail');
+        if (!btn) return;
+        const id = btn.getAttribute('data-id');
+        if (id) openDetailById(id);
+      });
+
+      document.getElementById('modalCloseBtn').addEventListener('click', function () {
+        const modal = getModalInstance();
+        modal.hide();
+      });
+
+    });
+</script>
+
+
+
+<style>
+    body {
+        background-color: #f8f9fa;
+    }
+    .table-container {
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        padding: 20px;
+        margin-top: 40px;
+    }
+    .table th {
+        background-color: #f1f3f5;
+    }
+    .pagination {
+        justify-content: center;
+        margin-top: 20px;
+    }
+    .page-info {
+        text-align: center;
+        color: #6c757d;
+        font-size: 0.9rem;
+        margin-top: 10px;
+    }
+</style>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
+        crossorigin="anonymous"></script>
+</body>
+</html>

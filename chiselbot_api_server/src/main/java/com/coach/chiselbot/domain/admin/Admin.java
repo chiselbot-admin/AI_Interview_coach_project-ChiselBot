@@ -1,20 +1,21 @@
 package com.coach.chiselbot.domain.admin;
 
-import jakarta.persistence.*;
+import com.coach.chiselbot._global.entity.BaseEntity;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.hibernate.annotations.CreationTimestamp;
-
-import java.sql.Timestamp;
 
 @Entity
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Admin {
+public class Admin extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -24,8 +25,5 @@ public class Admin {
     private String email;
     private String password;
     // private String imagePath;
-    @CreationTimestamp
-    @Column(nullable = false,updatable = false)
-    private Timestamp createdAt;
 
 }

@@ -47,6 +47,8 @@ public class MenuInfoResponse {
         private Boolean visible;
         private String description;
 
+        private boolean isMenuManagement; // 메뉴관리 메뉴인지 판단
+
         public FindAll(MenuInfo menuInfo){
             this.id = menuInfo.getId();
             this.menuName = menuInfo.getMenuName();
@@ -56,6 +58,8 @@ public class MenuInfoResponse {
             this.visible = menuInfo.getVisible();
             this.urlPath = menuInfo.getUrlPath();
             this.description = menuInfo.getDescription();
+            this.isMenuManagement = "메뉴관리".equals(menuInfo.getMenuName()) ||
+                    "MENU_MANAGEMENT".equals(menuInfo.getMenuCode());
         }
 
         public static MenuInfoResponse.FindAll from(MenuInfo menuInfo){return new MenuInfoResponse.FindAll(menuInfo);}
