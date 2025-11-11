@@ -69,15 +69,18 @@ public class UserService {
     /**
      * 회원 정보 수정 처리
      */
-    public User update(String userEmail, UserRequestDTO.Update dto) {
-        User user = userJpaRepository.findByEmail(userEmail)
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 회원입니다."));
+	public User update(String userEmail, UserRequestDTO.Update dto) {
+		User user = userJpaRepository.findByEmail(userEmail)
+				.orElseThrow(() -> new IllegalArgumentException("존재하지 않는 회원입니다."));
 
-        user.setName(dto.getName());
-        user.setPassword(passwordEncoder.encode(dto.getPassword()));
-
-        return userJpaRepository.save(user);
-    }
+		if (user.getProvider() == Provider.KAKAO) {
+			user.setName(dto.getName());
+		} else  {
+			user.setName(dto.getName());
+			user.setPassword(passwordEncoder.encode(dto.getPassword()));
+		}
+		return userJpaRepository.save(user);
+	}
 
     // 회원 전체 조회
 
