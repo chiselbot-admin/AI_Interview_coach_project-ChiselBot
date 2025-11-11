@@ -83,8 +83,9 @@ Future<String?> pickInterviewLevel(BuildContext context) async {
                   children: [
                     Text('안내', style: TextStyle(fontWeight: FontWeight.w600)),
                     SizedBox(height: 6),
-                    Text('• LEVEL 1: 정답 유사도(점수)와 모범답안을 제공합니다.'),
-                    Text('• LEVEL 2: 의도/포인트 기반 피드백과 등급(상/중/하)만 제공합니다.'),
+                    Text('• LEVEL 1 \n정답 유사도(점수)와 모범답안을 제공합니다.'
+                        '\n(유사도 80점 이상 시 TIP은 제공되지 않습니다.)'),
+                    Text('• LEVEL 2 \n의도/포인트 기반 피드백과 \n등급(상/중/하)만 제공합니다.'),
                   ],
                 ),
               ),
