@@ -49,16 +49,6 @@ public class InterviewCoachService {
         // 2. 프롬프트 생성
         String prompt = promptFactory.createPrompt(question, feedbackRequest.getUserAnswer(), similarity);
 
-        // 디버깅
-        System.out.println("===== 프롬프트 생성 확인 =====");
-        System.out.println("questionId: " + feedbackRequest.getQuestionId());
-        System.out.println("questionText: " + question.getQuestionText());
-        System.out.println("answerText: " + question.getAnswerText());
-        System.out.println("userAnswer: " + feedbackRequest.getUserAnswer());
-        System.out.println("similarity: " + similarity.getIntentSimilarity());
-        System.out.println("생성된 프롬프트:\n" + prompt);
-        System.out.println("================================");
-
         // 3. AI 모델 호출 - 응답 받기
         String aiAnswer = chatModel.call(prompt);
 
