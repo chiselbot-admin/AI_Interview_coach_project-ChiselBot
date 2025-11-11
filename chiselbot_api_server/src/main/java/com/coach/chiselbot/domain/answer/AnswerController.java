@@ -28,8 +28,8 @@ public class AnswerController {
     public String updateForm(@PathVariable(name = "answerId") Long id,
                              Model model) {
         AnswerResponseDTO.UpdateForm dto = answerService.getUpdateForm(id);
-        model.addAttribute("answer",dto);
-        return "auth/inquiry-answer-update";
+        model.addAttribute("answer", dto);
+        return "inquiry/inquiry-answer-update";
     }
 
     /**
@@ -42,7 +42,7 @@ public class AnswerController {
             @ModelAttribute AnswerRequestDTO.Update dto,
             HttpSession session) {
         Admin admin = (Admin) session.getAttribute(Define.SESSION_USER);
-        Long inquiryId = answerService.updateAnswer(id,admin.getId(),dto);
+        Long inquiryId = answerService.updateAnswer(id, admin.getId(), dto);
         return "redirect:/admin/inquiries/" + inquiryId;
     }
 
@@ -54,8 +54,8 @@ public class AnswerController {
     public String answerForm(@PathVariable(name = "inquiryId") Long id, Model model) {
 
         InquiryResponseDTO.AdminInquiryDetail dto = inquiryService.getAdminInquiryDetail(id);
-        model.addAttribute("inquiry",dto);
-        return "auth/inquiry-answer";
+        model.addAttribute("inquiry", dto);
+        return "inquiry/inquiry-answer";
     }
 
     /**
@@ -66,7 +66,7 @@ public class AnswerController {
     public String createAnswer(@PathVariable(name = "inquiryId") Long id,
                                @ModelAttribute AnswerRequestDTO.Create dto,
                                @SessionAttribute(Define.SESSION_USER) Admin admin) {
-        answerService.createAnswer(id, admin.getId(),dto);
+        answerService.createAnswer(id, admin.getId(), dto);
         return "redirect:/admin/inquiries/" + id;
     }
 }

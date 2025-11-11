@@ -3,8 +3,6 @@ package com.coach.chiselbot.domain.answer;
 import com.coach.chiselbot._global.errors.adminException.AdminException403;
 import com.coach.chiselbot._global.errors.adminException.AdminException404;
 import com.coach.chiselbot._global.errors.exception.Exception400;
-import com.coach.chiselbot._global.errors.exception.Exception403;
-import com.coach.chiselbot._global.errors.exception.Exception404;
 import com.coach.chiselbot.domain.Inquiry.Inquiry;
 import com.coach.chiselbot.domain.Inquiry.InquiryRepository;
 import com.coach.chiselbot.domain.Inquiry.InquiryStatus;
@@ -32,7 +30,7 @@ public class AnswerService {
         Answer answer = answerRepository.findByIdWithInquiry(answerId)
                 .orElseThrow(() -> new AdminException404("답변을 찾을 수 없습니다."));
 
-         return AnswerResponseDTO.UpdateForm.from(answer);
+        return AnswerResponseDTO.UpdateForm.from(answer);
     }
 
     /**

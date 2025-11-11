@@ -3,20 +3,16 @@ package com.coach.chiselbot.domain.Inquiry.controller;
 import com.coach.chiselbot.domain.Inquiry.InquiryService;
 import com.coach.chiselbot.domain.Inquiry.dto.InquiryRequestDTO;
 import com.coach.chiselbot.domain.Inquiry.dto.InquiryResponseDTO;
-import com.coach.chiselbot.domain.notice.dto.NoticeRequest;
-import com.coach.chiselbot.domain.notice.dto.NoticeResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 @Controller
@@ -34,7 +30,7 @@ public class AdminInquiryController {
     public String adminInquiryDetail(@PathVariable(name = "inquiryId") Long id,
                                      Model model) {
         InquiryResponseDTO.AdminInquiryDetail inquiryDetail = inquiryService.getAdminInquiryDetail(id);
-        model.addAttribute("inquiry",inquiryDetail);
+        model.addAttribute("inquiry", inquiryDetail);
         return "inquiry/inquiry-detail";
     }
 
@@ -56,31 +52,9 @@ public class AdminInquiryController {
                 .mapToObj(i -> new InquiryRequestDTO.PageInfo(i + 1, i, i == currentPage))
                 .toList();
 
-        /*
-        int totalElements = (int) inquiries.getTotalElements();
-        int currentPage = inquiries.getNumber();
-        int pageSize = inquiries.getSize();
-        int totalPages = inquiries.getTotalPages();
-
-        int startNumber = totalElements - (currentPage * pageSize);
-        for (int i = 0; i < inquiries.getContent().size(); i++) {
-            inquiries.getContent().get(i).setDisplayNumber(startNumber - i);
-        }
-
-
-        // 페이지 번호 목록 생성
-        List<Map<String, Object>> pageNumbers = IntStream.range(0, totalPages)
-                .mapToObj(i -> Map.<String, Object>ofEntries(
-                        Map.entry("index", i),
-                        Map.entry("display", i + 1),
-                        Map.entry("isCurrent", i == currentPage)
-                ))
-                .toList();
-        */
-
         // Mustache 에서 사용 할 값 넘겨주는 Model
         model.addAttribute("inquiries", inquiryLists); // 등록되어있는 질문 리스트
-        model.addAttribute("currentPage", inquiryListPage.getNumber()+ 1); // 현재 페이지
+        model.addAttribute("currentPage", inquiryListPage.getNumber() + 1); // 현재 페이지
         model.addAttribute("totalPages", inquiryListPage.getTotalPages()); // 전체 페이지 수
         model.addAttribute("hasNext", inquiryListPage.hasNext()); // 다음 페이지 존재 여부
         model.addAttribute("hasPrevious", inquiryListPage.hasPrevious()); // 이전페이지 존재 여부

@@ -5,10 +5,6 @@ import com.coach.chiselbot.domain.answer.Answer;
 import com.coach.chiselbot.domain.user.User;
 import jakarta.persistence.*;
 import lombok.*;
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
-
-import java.sql.Timestamp;
 
 @Entity
 @Getter

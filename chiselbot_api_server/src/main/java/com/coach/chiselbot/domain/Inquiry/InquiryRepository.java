@@ -39,13 +39,13 @@ public interface InquiryRepository extends JpaRepository<Inquiry, Long> {
 
     // 연도별 문의 통계
     @Query(value = """
-    SELECT EXTRACT(MONTH FROM i.regdate) AS "month",
-           COUNT(*) AS "count"
-    FROM inquiry i
-    WHERE EXTRACT(YEAR FROM i.regdate) = :year
-    GROUP BY EXTRACT(MONTH FROM i.regdate)
-    ORDER BY EXTRACT(MONTH FROM i.regdate)
-""", nativeQuery = true)
+                SELECT EXTRACT(MONTH FROM i.regdate) AS "month",
+                       COUNT(*) AS "count"
+                FROM inquiry i
+                WHERE EXTRACT(YEAR FROM i.regdate) = :year
+                GROUP BY EXTRACT(MONTH FROM i.regdate)
+                ORDER BY EXTRACT(MONTH FROM i.regdate)
+            """, nativeQuery = true)
     List<MonthlyInquiryStats> countInquiriesByYear(@Param("year") int year);
 
     @Query(
