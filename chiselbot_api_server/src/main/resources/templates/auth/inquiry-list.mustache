@@ -1,0 +1,139 @@
+{{> layout/header }}
+<body id="page-top">
+<div id="wrapper">
+    {{> layout/sidebar }}
+    <div id="content-wrapper" class="d-flex flex-column">
+        <div id="content">
+            {{> layout/topbar }}
+
+            <div class="container mt-5">
+                <h2 class="mb-4 text-center fw-bold">1:1 문의 관리</h2>
+
+                <div class="table-container">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <div class="page-info">
+                            총 {{totalElements}}개의 문의
+                        </div>
+                    </div>
+
+                    <table class="table table-hover align-middle">
+                        <thead>
+                        <tr>
+                            <th style="width: 6%;">ID</th>
+                            <th style="width: 25%;">제목</th>
+                            <th style="width: 18%;">작성자 이메일</th>
+                            <th style="width: 12%;">상태</th>
+                            <th style="width: 14%;">문의 등록일</th>
+                            <th style="width: 14%;">답변 등록일</th>
+                            <th style="width: 11%;">관리</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {{#inquiries}}
+                            <tr>
+                                <td>{{inquiryId}}</td>
+                                <td>{{title}}</td>
+                                <td>{{userName}}</td>
+                                <td>
+                                    {{#isWaiting}}<span class="badge bg-warning text-dark">{{status.label}}</span>{{/isWaiting}}
+                                    {{#isAnswered}}<span class="badge bg-success">{{status.label}}</span>{{/isAnswered}}
+                                    {{#isClosed}}<span class="badge bg-secondary">{{status.label}}</span>{{/isClosed}}
+                                </td>
+                                <td>{{createdAt}}</td>
+                                <td>
+                                    {{#answerCreatedAt}}
+                                        {{answerCreatedAt}}<br>
+                                    {{/answerCreatedAt}}
+                                    {{^answerCreatedAt}}-{{/answerCreatedAt}}
+                                </td>
+                                <td>
+                                    <a href="/admin/inquiries/{{inquiryId}}" class="btn btn-sm btn-primary">
+                                        상세보기
+                                    </a>
+                                </td>
+                            </tr>
+                        {{/inquiries}}
+
+                        {{^inquiries}}
+                            <tr>
+                                <td colspan="7" class="text-center text-muted">등록된 문의가 없습니다.</td>
+                            </tr>
+                        {{/inquiries}}
+                        </tbody>
+                    </table>
+
+                    <nav aria-label="Page navigation" class="mt-4">
+                        <ul class="pagination justify-content-center">
+                            {{#hasPrevious}}
+                                <li class="page-item">
+                                    <a class="page-link" href="/admin/inquiries?page={{prevPage}}">이전</a>
+                                </li>
+                            {{/hasPrevious}}
+
+                            {{#pageInfos}}
+                                {{#current}}
+                                    <a class="page-link text-white bg-primary border-primary"
+                                       tabindex="-1"
+                                       style="pointer-events: none; opacity: 0.85; cursor: default;">
+                                        {{number}}
+                                    </a>
+                                {{/current}}
+
+                                {{^current}}
+                                    <a class="page-link"
+                                       href="/admin/inquiries?page={{index}}"
+                                    style="cursor: pointer;">
+                                    {{number}}
+                                    </a>
+                                {{/current}}
+                            {{/pageInfos}}
+
+                            {{#hasNext}}
+                                <li class="page-item">
+                                    <a class="page-link" href="/admin/inquiries?page={{nextPage}}">다음</a>
+                                </li>
+                            {{/hasNext}}
+                        </ul>
+                    </nav>
+
+                </div>
+            </div>
+        </div>
+        {{> layout/footer }}
+    </div>
+</div>
+
+<style>
+    body {
+        background-color: #f8f9fa;
+    }
+    .table-container {
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        padding: 20px;
+        margin-top: 40px;
+    }
+    .table th {
+        background-color: #f1f3f5;
+    }
+    .pagination {
+        justify-content: center;
+        margin-top: 20px;
+    }
+    .pagination .page-item.active .page-link {
+        background-color: #0d6efd;
+        border-color: #0d6efd;
+        color: white;
+    }
+    .page-info {
+        text-align: center;
+        color: #6c757d;
+        font-size: 0.9rem;
+        margin-top: 10px;
+    }
+</style>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

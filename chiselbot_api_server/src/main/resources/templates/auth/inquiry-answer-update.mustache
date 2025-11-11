@@ -1,0 +1,36 @@
+{{> layout/header }}
+<body id="page-top">
+<div id="wrapper">
+    {{> layout/sidebar }}
+    <div id="content-wrapper" class="d-flex flex-column">
+        <div id="content">
+            {{> layout/topbar }}
+
+            <div class="container mt-5">
+                <h2 class="mb-4 text-center fw-bold">답변 수정</h2>
+
+                <div class="card shadow-sm p-4">
+                    <form action="/admin/inquiry/{{answer.answerId}}/update" method="post">
+                        <div class="mb-3">
+                            <label class="fw-bold">문의 제목</label>
+                            <p class="form-control-plaintext border rounded p-2 bg-light">{{answer.inquiryTitle}}</p>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="fw-bold">현재 답변 내용</label>
+                            <textarea name="content" class="form-control" rows="6">{{answer.content}}</textarea>
+                        </div>
+
+                        <div class="text-end">
+                            <a href="/admin/inquiries/{{answer.inquiryId}}" class="btn btn-secondary">취소</a>
+                            <button type="submit" class="btn btn-success ms-2">수정 완료</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        {{> layout/footer }}
+    </div>
+</div>
+</body>
+</html>
