@@ -1,6 +1,8 @@
 package com.coach.chiselbot.domain.menuInfo.dto;
 
 import com.coach.chiselbot.domain.menuInfo.MenuInfo;
+import com.coach.chiselbot.domain.notice.Notice;
+import com.coach.chiselbot.domain.notice.dto.NoticeResponse;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -55,6 +57,8 @@ public class MenuInfoResponse {
             this.urlPath = menuInfo.getUrlPath();
             this.description = menuInfo.getDescription();
         }
+
+        public static MenuInfoResponse.FindAll from(MenuInfo menuInfo){return new MenuInfoResponse.FindAll(menuInfo);}
 
         public static List<MenuInfoResponse.FindAll> from(List<MenuInfo> menuInfos){
             List<MenuInfoResponse.FindAll> dtoList = new ArrayList<>();

@@ -13,7 +13,7 @@
                 <div class="table-container">
                     <div class="d-flex justify-content-between align-items-center mb-2">
                         <div class="page-info">
-                            총 {{menuInfo.size}}개의 메뉴
+                            총 {{totalElements}}개의 메뉴
                         </div>
                         <a href="/admin/menus/create" class="btn btn-sm btn-primary">새 메뉴 등록</a>
                     </div>
@@ -55,6 +55,42 @@
                         {{/menuInfo}}
                         </tbody>
                     </table>
+                    <!-- 페이지네이션 -->
+                    <nav>
+                        <ul class="pagination">
+                            {{#hasPrevious}}
+                                <li class="page-item">
+                                    <a class="page-link" href="/admin/menus?page={{prevPage}}">이전</a>
+                                </li>
+                            {{/hasPrevious}}
+
+                            {{#pageInfos}}
+                                <li class="page-item {{#current}}active{{/current}}">
+                                    {{#current}}
+                                        <a class="page-link text-white bg-primary border-primary"
+                                           tabindex="-1"
+                                           style="pointer-events: none; opacity: 0.85; cursor: default;">
+                                            {{number}}
+                                        </a>
+                                    {{/current}}
+
+                                    {{^current}}
+                                        <a class="page-link"
+                                           href="/admin/menus?page={{index}}"
+                                        style="cursor: pointer;">
+                                        {{number}}
+                                        </a>
+                                    {{/current}}
+                                </li>
+                            {{/pageInfos}}
+
+                            {{#hasNext}}
+                                <li class="page-item">
+                                    <a class="page-link" href="/admin/menus?page={{nextPage}}">다음</a>
+                                </li>
+                            {{/hasNext}}
+                        </ul>
+                    </nav>
                 </div>
             </div>
             <!-- 레이아웃 작업 종료 부분 -->
@@ -77,16 +113,15 @@
     .table th {
         background-color: #f1f3f5;
     }
-    .table td, .table th {
-        vertical-align: middle;
+    .pagination {
+        justify-content: center;
+        margin-top: 20px;
     }
     .page-info {
+        text-align: center;
         color: #6c757d;
         font-size: 0.9rem;
-    }
-    .btn-primary {
-        background-color: #4e73df;
-        border-color: #4e73df;
+        margin-top: 10px;
     }
 </style>
 

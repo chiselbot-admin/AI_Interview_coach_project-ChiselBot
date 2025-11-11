@@ -4,6 +4,9 @@ import com.coach.chiselbot._global.errors.adminException.AdminException404;
 import com.coach.chiselbot.domain.menuInfo.dto.MenuInfoRequest;
 import com.coach.chiselbot.domain.menuInfo.dto.MenuInfoResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -24,9 +27,13 @@ public class MenuInfoService {
         return menuInfoRepository.findAllByVisibleTrueOrderByMenuOrderAsc();
     }
 
-    public List<MenuInfoResponse.FindAll> getAllMenus() {
-        List<MenuInfo> menus = menuInfoRepository.findAll(Sort.by(Sort.Direction.ASC, "menuOrder"));
-        return MenuInfoResponse.FindAll.from(menus);
+    public Page<MenuInfoResponse.FindAll> getAllMenus(int page) {
+        int pageSize = 10;
+        Pageable pageable = PageRequest.of(page, pageSize, Sort.by("menuOrder").ascending());
+
+
+        //List<MenuInfo> menus = menuInfoRepository.findAll(Sort.by(Sort.Direction.ASC, "menuOrder"));
+        return menuInfoRepository.findAll(pageable).map(menuInfo -> MenuInfoResponse.FindAll.from(menuInfo));
     }
 
     /**
