@@ -50,7 +50,7 @@ class MyApp extends ConsumerWidget {
         darkTheme: AppTheme.darkTheme,
         themeMode: themeMode.themeMode,
         onGenerateRoute: AppRouter.generateRoute,
-        initialRoute: RoutePaths.login,
+        initialRoute: RoutePaths.root,
       ),
     );
   }

@@ -70,7 +70,6 @@ public class NoticeResponse {
             this.authorName = notice.getAdmin().getAdminName();
         }
 
-
         public static FindAll from(Notice notice){return new FindAll(notice);}
 
         public static List<FindAll> from(List<Notice> notices){

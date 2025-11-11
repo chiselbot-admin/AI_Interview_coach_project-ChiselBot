@@ -10,15 +10,6 @@ import lombok.ToString;
 
 public class NoticeRequest {
 
-    @Getter
-    @Setter
-    @ToString
-    @AllArgsConstructor
-    public static class PageInfo {
-        private int number;      // 1-based 표시용
-        private int index;       // 0-based 실제 쿼리 파라미터용
-        private boolean current; // 현재 페이지 여부
-    }
 
     @Getter
     @Setter

@@ -1,5 +1,6 @@
 package com.coach.chiselbot.domain.notice;
 
+import com.coach.chiselbot._global.common.Define;
 import com.coach.chiselbot._global.errors.adminException.AdminException404;
 import com.coach.chiselbot.domain.admin.Admin;
 import com.coach.chiselbot.domain.admin.AdminRepository;
@@ -33,7 +34,7 @@ public class NoticeService {
         int pageSize = 10;
         Pageable pageable = PageRequest.of(page, pageSize, Sort.by("noticeId").descending());
 
-        return noticeRepository.findAll(pageable).map(NoticeResponse.FindAll::new);
+        return noticeRepository.findAll(pageable).map(notice -> NoticeResponse.FindAll.from(notice));
     }
 
     public List<NoticeResponse.FindAll> getNoticeList(){
@@ -46,7 +47,7 @@ public class NoticeService {
 
     public NoticeResponse.FindById getNoticeDetail(Long noticeId){
         Notice notice = noticeRepository.findById(noticeId)
-                .orElseThrow(()-> new AdminException404("해당 공지사항이 없습니다"));
+                .orElseThrow(()-> new AdminException404(Define.NOTICE_NOT_FOUND));
 
 
         return new NoticeResponse.FindById(notice);
@@ -55,7 +56,7 @@ public class NoticeService {
     @Transactional
     public NoticeResponse.FindById getNoticeDetailWithViewCount(Long noticeId){
         Notice notice = noticeRepository.findById(noticeId)
-                .orElseThrow(()-> new AdminException404("해당 공지사항이 없습니다"));
+                .orElseThrow(()-> new AdminException404(Define.NOTICE_NOT_FOUND));
 
         notice.increaseViewCount();
 
@@ -75,10 +76,10 @@ public class NoticeService {
     @Transactional
     public void deleteNotice(Long noticeId, Admin admin) {
 
-        Admin searchAdmin = adminRepository.findById(admin.getId()).orElseThrow(() -> new AdminException404("존재하지 않는 관리자 아이디입니다."));
+        Admin searchAdmin = adminRepository.findById(admin.getId()).orElseThrow(() -> new AdminException404(Define.ADMIN_NOT_FOUND));
 
         Notice notice = noticeRepository.findById(noticeId)
-                .orElseThrow(() -> new AdminException404("존재하지 않는 공지사항입니다. id=" + noticeId));
+                .orElseThrow(() -> new AdminException404(Define.NOTICE_NOT_FOUND));
 
         noticeRepository.delete(notice);
     }
@@ -86,26 +87,22 @@ public class NoticeService {
     @Transactional
     public void updateNotice(Long id, NoticeRequest.UpdateNotice reqDTO, Admin admin) {
 
-        Admin searchAdmin = adminRepository.findById(admin.getId()).orElseThrow(() -> new AdminException404("존재하지 않는 관리자 아이디입니다."));
+        Admin searchAdmin = adminRepository.findById(admin.getId()).orElseThrow(() -> new AdminException404(Define.ADMIN_NOT_FOUND));
 
         Notice notice = noticeRepository.findById(id)
-                .orElseThrow(() -> new AdminException404("공지사항이 존재하지 않습니다. id=" + id));
-
-        log.info("noticeReqDTO 확인 : {}", reqDTO.toString());
+                .orElseThrow(() -> new AdminException404(Define.NOTICE_NOT_FOUND));
 
         notice.setTitle(reqDTO.getTitle());
         notice.setContent(reqDTO.getNoticeContent());
         notice.setIsVisible(reqDTO.isVisible());
         notice.setAdmin(searchAdmin);
-
-        log.info("변경 후 notcie값 확인 : {}", notice.toString());
     }
 
     @Transactional
     public void createNotice(NoticeRequest.CreateNotice reqDTO, Admin admin) {
 
 
-        Admin searchAdmin = adminRepository.findById(admin.getId()).orElseThrow(() -> new AdminException404("존재하지 않는 관리자 아이디입니다."));
+        Admin searchAdmin = adminRepository.findById(admin.getId()).orElseThrow(() -> new AdminException404(Define.ADMIN_NOT_FOUND));
 
         Notice notice = Notice.builder()
                 .title(reqDTO.getTitle())

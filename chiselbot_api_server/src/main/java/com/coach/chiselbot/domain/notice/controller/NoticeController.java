@@ -1,6 +1,7 @@
 package com.coach.chiselbot.domain.notice.controller;
 
 import com.coach.chiselbot._global.common.Define;
+import com.coach.chiselbot._global.common.PageLink;
 import com.coach.chiselbot.domain.admin.Admin;
 import com.coach.chiselbot.domain.notice.NoticeService;
 import com.coach.chiselbot.domain.notice.dto.NoticeRequest;
@@ -33,8 +34,8 @@ public class NoticeController {
 
         int totalPages = noticePage.getTotalPages();
         int currentPage = noticePage.getNumber(); // 0-based
-        List<NoticeRequest.PageInfo> pageInfos = IntStream.range(0, totalPages)
-                .mapToObj(i -> new NoticeRequest.PageInfo(i + 1, i, i == currentPage))
+        List<PageLink> pageInfos = IntStream.range(0, totalPages)
+                .mapToObj(i -> new PageLink(i + 1, i, i == currentPage))
                 .collect(Collectors.toList());
 
         // Mustache 에서 사용 할 값 넘겨주는 Model

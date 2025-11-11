@@ -11,6 +11,8 @@ class SettingsScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final userInfo = ref.watch(currentUserInfoProvider);
+    final bool isUserLoggedIn = userInfo.$4;
     return Scaffold(
       appBar: AppBar(),
       body: ListView(
@@ -59,21 +61,23 @@ class SettingsScreen extends ConsumerWidget {
             },
           ),
           Divider(color: Colors.grey.shade800, indent: 16, endIndent: 16),
-          // 로그아웃
-          ListTile(
-            leading: const Icon(FontAwesomeIcons.rightFromBracket,
-                size: 24, color: Colors.redAccent),
-            title:
-                const Text('로그아웃', style: TextStyle(color: Colors.redAccent)),
-            onTap: () async {
-              await ref.read(authNotifierProvider.notifier).logout();
-              if (context.mounted) {
-                Navigator.of(context).pushNamedAndRemoveUntil(
-                    RoutePaths.login, (route) => false);
-              }
-            },
-          ),
-          Divider(color: Colors.grey.shade800, indent: 16, endIndent: 16),
+          if (isUserLoggedIn) ...[
+            // 로그아웃
+            ListTile(
+              leading: const Icon(FontAwesomeIcons.rightFromBracket,
+                  size: 24, color: Colors.redAccent),
+              title:
+                  const Text('로그아웃', style: TextStyle(color: Colors.redAccent)),
+              onTap: () async {
+                await ref.read(authNotifierProvider.notifier).logout();
+                if (context.mounted) {
+                  Navigator.of(context).pushNamedAndRemoveUntil(
+                      RoutePaths.login, (route) => false);
+                }
+              },
+            ),
+            Divider(color: Colors.grey.shade800, indent: 16, endIndent: 16),
+          ]
         ],
       ),
     );
