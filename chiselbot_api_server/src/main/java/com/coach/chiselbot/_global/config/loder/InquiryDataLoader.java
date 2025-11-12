@@ -23,7 +23,7 @@ import java.util.List;
 
 @Component
 @RequiredArgsConstructor
-@Profile("local")
+@Profile("dev")
 @Order(3)
 public class InquiryDataLoader implements CommandLineRunner {
 

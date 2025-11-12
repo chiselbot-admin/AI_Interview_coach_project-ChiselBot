@@ -24,7 +24,7 @@ import java.util.List;
 
 @Component
 @RequiredArgsConstructor
-@Profile("local")
+@Profile("dev")
 @Order(2)
 public class AdminDataLoader implements CommandLineRunner {
 

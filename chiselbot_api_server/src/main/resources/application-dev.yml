@@ -4,6 +4,26 @@ logging:
     com.coach.chiselbot: DEBUG
 
 spring:
+  application:
+    name: chiselbot
+
+  mustache:
+    # 템플릿 파일의 확장자를 .mustache로 지정하여 Mustache
+    # 템플릿 파일을 인식하도록 설정
+    suffix: .mustache
+    # 템플릿 파일이 위치한
+    # 기본 경로를 src/main/resources/templates/로 설정
+    prefix: classpath:/templates/
+    # 개발 중 템플릿 캐시를 비활성화하여 코드
+    # 수정 후 바로 반영되도록 함 (프로덕션에서는 true로 설정 권장)
+    cache: false
+    # 템플릿 파일을 UTF-8 인코딩으로 처리하여 한글 등 다양한 문자 지원
+    charset: UTF-8
+    servlet:
+      # 세션과 요청 속성을 템플릿에서 사용 가능하게 함
+      expose-session-attributes: true
+      expose-request-attributes: true
+
   datasource:
     url: jdbc:postgresql://192.168.0.188:5432/ai_coach_chiselbot
     username: chisel_admin
@@ -18,10 +38,6 @@ spring:
         format_sql: true
     show-sql: true
     open-in-view: false
-
-
-  application:
-    name: chiselbot
 
   # ★여기로 옮김: spring.mail
   mail:
@@ -54,6 +70,11 @@ spring:
 jwt:
   secret: "VGhpc0lzQVNlY3JldEtleUZvckpXVFQxMjM0NTZBUElLRVkzNDQzMjE="
   expiration-in-ms: 3600000
+
+oauth:
+  kakao:
+    client-id: ${KAKAO_CLIENT_ID}
+    redirect-uri: ${KAKAO_REDIRECT_URI}
 
 notification:
   policy:
