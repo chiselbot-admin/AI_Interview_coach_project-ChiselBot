@@ -17,7 +17,7 @@ import java.util.Random;
 
 @Component
 @RequiredArgsConstructor
-@Profile("local")
+@Profile("dev")
 @Order(3)
 public class NoticeLoader implements CommandLineRunner {
 

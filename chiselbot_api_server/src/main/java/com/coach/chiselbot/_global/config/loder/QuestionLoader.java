@@ -23,7 +23,7 @@ import java.util.Random;
 
 @Component
 @RequiredArgsConstructor
-@Profile("local")
+@Profile("dev")
 @Order(4)
 public class QuestionLoader implements CommandLineRunner {
 

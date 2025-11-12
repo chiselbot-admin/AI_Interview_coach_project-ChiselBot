@@ -12,7 +12,7 @@ import org.springframework.stereotype.Component;
 
 @Component
 @RequiredArgsConstructor
-@Profile("local")
+@Profile("dev")
 @Order(1)
 public class UserDataLoader implements CommandLineRunner {
 
