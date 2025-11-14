@@ -157,7 +157,7 @@ public class AdminDataLoader implements CommandLineRunner {
                     .menuName("관리자 관리")
                     .menuCode("ADMIN")
                     .urlPath("/admin/settings")
-                    .menuOrder(4)
+                    .menuOrder(6)
                     .description("관리자 관리")
                     //.parent(dashboard) // 부모 연결 가능
                     .build());
